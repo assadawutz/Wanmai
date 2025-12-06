@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>PM Command Center</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reactflow@11.11.4/dist/style.css" />
+    <style>
+      :root {
+        --font-sans: 'Outfit', system-ui, -apple-system, sans-serif;
+        --font-serif: 'Cormorant Garamond', serif;
+      }
+      
+      body {
+        font-family: var(--font-sans);
+        background-color: #fff9fa; /* Very Pale Blush/White - Lighter than before */
+        /* Subtler Floral Pattern: Soft Rose color with very low opacity */
+        background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23fb7185' fill-opacity='0.08'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E"),
+        radial-gradient(circle at 0% 0%, rgba(255, 228, 230, 0.4) 0%, rgba(255, 255, 255, 0) 50%),
+        radial-gradient(circle at 100% 100%, rgba(253, 164, 175, 0.15) 0%, rgba(255, 255, 255, 0) 50%);
+        background-attachment: fixed;
+        color: #334155; /* Slate-700 for better contrast text */
+      }
+
+      /* Typography Enhancements */
+      .font-sans { font-family: var(--font-sans) !important; }
+      .font-serif { font-family: var(--font-serif) !important; }
+      
+      h1, h2, h3, h4, h5, h6 {
+        letter-spacing: -0.01em;
+      }
+
+      /* React Flow Overrides - Cleaner look */
+      .react-flow__node { border: none; background: transparent; }
+      .react-flow__controls { 
+        box-shadow: 0 4px 12px -2px rgba(0,0,0,0.05) !important; 
+        border: 1px solid rgba(255,255,255,0.6) !important; 
+        background: rgba(255,255,255,0.8) !important;
+        backdrop-filter: blur(8px);
+      }
+      .react-flow__minimap { border-radius: 12px !important; overflow: hidden; border: 1px solid rgba(244,114,182,0.1); }
+      
+      /* Animations */
+      .animate-spin-slow { animation: spin 3s linear infinite; }
+      .animate-fade-in { animation: fadeIn 0.5s ease-out forwards; }
+      .animate-scale-in { animation: scaleIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+      .animate-slide-up { animation: slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+      .animate-float { animation: float 6s ease-in-out infinite; }
+
+      @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+      @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+      @keyframes scaleIn { from { opacity: 0; transform: scale(0.96); } to { opacity: 1; transform: scale(1); } }
+      @keyframes slideUp { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
+      @keyframes float { 0% { transform: translateY(0px); } 50% { transform: translateY(-8px); } 100% { transform: translateY(0px); } }
+
+      /* Elegant Scrollbar - Thinner and lighter */
+      .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
+      .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+      .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(244, 114, 182, 0.2); border-radius: 20px; }
+      .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: rgba(244, 114, 182, 0.4); }
+      
+      .no-scrollbar::-webkit-scrollbar { display: none; }
+      .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
+  <script type="importmap">
+{
+  "imports": {
+    "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.1/",
+    "react-dom": "https://aistudiocdn.com/react-dom@^19.2.1",
+    "lucide-react": "https://aistudiocdn.com/lucide-react@^0.556.0",
+    "react/": "https://aistudiocdn.com/react@^19.2.1/",
+    "react": "https://aistudiocdn.com/react@^19.2.1",
+    "reactflow/": "https://aistudiocdn.com/reactflow@^11.11.4/",
+    "reactflow": "https://aistudiocdn.com/reactflow@^11.11.4",
+    "recharts": "https://aistudiocdn.com/recharts@^3.5.1"
+  }
+}
+</script>
+</head>
+  <body>
+    <div id="root"></div>
+  </body>
+</html>

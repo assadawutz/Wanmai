@@ -1,0 +1,5 @@
+{
+  "name": "PM Command Center",
+  "description": "A Google Workspace integrated project management tool featuring Two-way sync, interactive flow diagrams with React Flow, and data-driven dashboards for Project Managers.",
+  "requestFramePermissions": []
+}
