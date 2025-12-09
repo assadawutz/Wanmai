@@ -20,7 +20,7 @@ import {
   LayoutTemplate, 
   Save, 
   Move, 
-  RotateCcw,
+  RotateCcw, 
   MousePointer2,
   Grid,
   ArrowRight,
@@ -32,7 +32,10 @@ import {
   X,
   User,
   Calendar,
-  Type
+  Type,
+  AlertTriangle,
+  AlignLeft,
+  CheckCircle2
 } from 'lucide-react';
 import CustomTaskNode from './CustomTaskNode';
 import { Task, TaskStatus, RiskLevel } from '../types';
@@ -180,7 +183,7 @@ const FlowEditorInner: React.FC<FlowEditorProps> = ({ tasks, onTaskChange, onTas
         return [...updatedNodes, ...newNodes];
       });
     }
-  }, [tasks, fitView, setNodes, setEdges]); // Removed 'nodes.length' to allow continuous sync
+  }, [tasks, fitView, setNodes, setEdges]); 
 
   const onConnect = useCallback(
     (params: Connection) => setEdges((eds) => addEdge({ 
@@ -197,11 +200,18 @@ const FlowEditorInner: React.FC<FlowEditorProps> = ({ tasks, onTaskChange, onTas
 
   // Handle Drag Stop to Sync Position
   const onNodeDragStop = useCallback((event: React.MouseEvent, node: Node) => {
+    // Trigger visual saving indicator
+    setIsSaving(true);
+    
+    // Sync position data to the parent/backend
     if (onTaskChange) {
       onTaskChange(node.id, { position: node.position });
     } else {
       WorkspaceService.syncTaskUpdate(node.id, { position: node.position });
     }
+
+    // Reset indicator
+    setTimeout(() => setIsSaving(false), 800);
   }, [onTaskChange]);
 
   const onNodeClick = useCallback((event: React.MouseEvent, node: Node) => {
@@ -221,6 +231,19 @@ const FlowEditorInner: React.FC<FlowEditorProps> = ({ tasks, onTaskChange, onTas
 
   const handleAddNode = () => {
     const id = `TSK-${Math.floor(Math.random() * 10000)}`;
+    
+    // Determine source node to connect from (Suggestion Logic)
+    // Priority: 
+    // 1. Currently selected node (Explicit user intent)
+    // 2. The last node in the list (Logical flow continuation)
+    const sourceNodeId = selectedNodeId || (nodes.length > 0 ? nodes[nodes.length - 1].id : null);
+    const sourceNode = nodes.find(n => n.id === sourceNodeId);
+    
+    // Calculate position: Shift right by 350px if source node exists, else random
+    const position = sourceNode 
+        ? { x: sourceNode.position.x + 350, y: sourceNode.position.y } 
+        : { x: Math.random() * 400 + 100, y: Math.random() * 400 + 100 };
+
     const newTask: Task = {
         id,
         name: 'New Task',
@@ -229,13 +252,42 @@ const FlowEditorInner: React.FC<FlowEditorProps> = ({ tasks, onTaskChange, onTas
         assignee: 'Unassigned',
         dueDate: new Date().toISOString().split('T')[0],
         description: 'Created via Flow Editor',
-        position: { x: Math.random() * 400 + 100, y: Math.random() * 400 + 100 }
+        position
     };
     
     // Notify parent to create the task in global state
     if (onTaskCreate) {
         onTaskCreate(newTask);
     }
+
+    // Auto-Suggest Connection to the source node
+    if (sourceNode) {
+        const newEdge: Edge = {
+            id: `e${sourceNode.id}-${id}`,
+            source: sourceNode.id,
+            target: id,
+            type: 'smoothstep',
+            animated: true,
+            label: 'Suggested Flow', // Visual cue
+            labelStyle: { fill: '#ec4899', fontWeight: 600, fontSize: 10 },
+            labelBgStyle: { fill: '#fff1f2', fillOpacity: 0.8 },
+            labelBgPadding: [4, 2],
+            labelBgBorderRadius: 4,
+            style: { 
+                stroke: '#fda4af', 
+                strokeWidth: 2, 
+                strokeDasharray: '5 5' // Dashed line to indicate suggestion/draft status
+            },
+            markerEnd: { type: MarkerType.ArrowClosed, color: '#fda4af' },
+        };
+        setEdges((eds) => [...eds, newEdge]);
+    }
+
+    // Auto-select the new node for immediate editing and fit view to show the connection
+    setTimeout(() => {
+        setSelectedNodeId(id);
+        fitView({ duration: 800, padding: 0.2 });
+    }, 100);
   };
 
   const handleSave = () => {
@@ -382,65 +434,113 @@ const FlowEditorInner: React.FC<FlowEditorProps> = ({ tasks, onTaskChange, onTas
           />
         </ReactFlow>
 
-        {/* Settings Panel Overlay */}
+        {/* Settings Panel Overlay - Side Panel */}
         {selectedTask && (
-             <div className="absolute top-4 right-4 w-80 bg-white/90 backdrop-blur-xl rounded-2xl shadow-2xl border border-pink-100 p-5 z-50 animate-slide-up">
+             <div className="absolute top-4 right-4 w-96 bg-white/95 backdrop-blur-xl rounded-2xl shadow-2xl border border-pink-100 p-5 z-50 animate-slide-up flex flex-col max-h-[calc(100%-32px)] overflow-y-auto custom-scrollbar">
                  {/* Header */}
-                 <div className="flex justify-between items-center mb-6">
-                    <h3 className="font-bold text-slate-700 flex items-center gap-2">
-                        <Settings2 size={18} className="text-pink-500"/>
-                        Node Settings
-                    </h3>
-                    <button onClick={() => setSelectedNodeId(null)} className="text-gray-400 hover:text-rose-500 transition-colors bg-white hover:bg-rose-50 p-1 rounded-full"><X size={18}/></button>
+                 <div className="flex justify-between items-start mb-6 pb-4 border-b border-pink-50">
+                    <div>
+                        <div className="flex items-center gap-2 mb-1">
+                             <Settings2 size={18} className="text-pink-500"/>
+                             <h3 className="font-bold text-slate-700">Task Details</h3>
+                        </div>
+                        <span className="text-[10px] font-mono text-gray-400 bg-gray-50 px-2 py-0.5 rounded border border-gray-100">
+                            {selectedTask.id}
+                        </span>
+                    </div>
+                    <button onClick={() => setSelectedNodeId(null)} className="text-gray-400 hover:text-rose-500 transition-colors bg-white hover:bg-rose-50 p-2 rounded-full shadow-sm border border-transparent hover:border-rose-100"><X size={16}/></button>
                  </div>
                  
-                 <div className="space-y-4">
+                 <div className="space-y-5">
                     {/* Task Name */}
-                    <div className="space-y-1">
-                        <label className="text-xs font-bold text-gray-400 uppercase tracking-wider">Task Name</label>
-                        <div className="relative">
-                            <Type className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={14} />
-                            <input 
-                                type="text" 
-                                value={selectedTask.name} 
-                                onChange={(e) => handleInputChange('name', e.target.value)}
-                                className="w-full bg-slate-50 border border-slate-200 rounded-lg pl-9 pr-3 py-2 text-sm font-semibold text-slate-700 focus:ring-2 focus:ring-pink-300 outline-none transition-all"
-                            />
+                    <div className="space-y-1.5">
+                        <label className="text-xs font-bold text-gray-400 uppercase tracking-wider flex items-center gap-1.5">
+                            <Type size={12}/> Task Name
+                        </label>
+                        <input 
+                            type="text" 
+                            value={selectedTask.name} 
+                            onChange={(e) => handleInputChange('name', e.target.value)}
+                            className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm font-bold text-slate-700 focus:ring-2 focus:ring-pink-300 outline-none transition-all focus:bg-white"
+                        />
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4">
+                        {/* Status */}
+                        <div className="space-y-1.5">
+                            <label className="text-xs font-bold text-gray-400 uppercase tracking-wider flex items-center gap-1.5">
+                                <CheckCircle2 size={12}/> Status
+                            </label>
+                            <select 
+                                value={selectedTask.status} 
+                                onChange={(e) => handleInputChange('status', e.target.value)}
+                                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-sm font-medium text-slate-700 focus:ring-2 focus:ring-pink-300 outline-none transition-all focus:bg-white cursor-pointer"
+                            >
+                                {Object.values(TaskStatus).map(s => <option key={s} value={s}>{s}</option>)}
+                            </select>
+                        </div>
+
+                         {/* Risk */}
+                         <div className="space-y-1.5">
+                            <label className="text-xs font-bold text-gray-400 uppercase tracking-wider flex items-center gap-1.5">
+                                <AlertTriangle size={12}/> Risk
+                            </label>
+                            <select 
+                                value={selectedTask.riskLevel} 
+                                onChange={(e) => handleInputChange('riskLevel', e.target.value)}
+                                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-sm font-medium text-slate-700 focus:ring-2 focus:ring-pink-300 outline-none transition-all focus:bg-white cursor-pointer"
+                            >
+                                {Object.values(RiskLevel).map(r => <option key={r} value={r}>{r}</option>)}
+                            </select>
                         </div>
                     </div>
 
                     {/* Assignee */}
-                    <div className="space-y-1">
-                        <label className="text-xs font-bold text-gray-400 uppercase tracking-wider">Assignee</label>
+                    <div className="space-y-1.5">
+                        <label className="text-xs font-bold text-gray-400 uppercase tracking-wider flex items-center gap-1.5">
+                            <User size={12}/> Assignee
+                        </label>
                         <div className="relative">
-                            <User className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={14} />
                             <input 
                                 type="text" 
                                 value={selectedTask.assignee}
                                 onChange={(e) => handleInputChange('assignee', e.target.value)}
-                                className="w-full bg-slate-50 border border-slate-200 rounded-lg pl-9 pr-3 py-2 text-sm font-semibold text-slate-700 focus:ring-2 focus:ring-pink-300 outline-none transition-all"
+                                className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-4 pr-4 py-2.5 text-sm font-medium text-slate-700 focus:ring-2 focus:ring-pink-300 outline-none transition-all focus:bg-white"
                             />
                         </div>
                     </div>
 
                     {/* Due Date */}
-                    <div className="space-y-1">
-                        <label className="text-xs font-bold text-gray-400 uppercase tracking-wider">Due Date</label>
-                         <div className="relative">
-                            <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={14} />
-                            <input 
-                                type="date" 
-                                value={selectedTask.dueDate}
-                                onChange={(e) => handleInputChange('dueDate', e.target.value)}
-                                className="w-full bg-slate-50 border border-slate-200 rounded-lg pl-9 pr-3 py-2 text-sm font-semibold text-slate-700 focus:ring-2 focus:ring-pink-300 outline-none transition-all"
-                            />
-                        </div>
+                    <div className="space-y-1.5">
+                        <label className="text-xs font-bold text-gray-400 uppercase tracking-wider flex items-center gap-1.5">
+                            <Calendar size={12}/> Due Date
+                        </label>
+                        <input 
+                            type="date" 
+                            value={selectedTask.dueDate}
+                            onChange={(e) => handleInputChange('dueDate', e.target.value)}
+                            className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm font-medium text-slate-700 focus:ring-2 focus:ring-pink-300 outline-none transition-all focus:bg-white"
+                        />
+                    </div>
+
+                    {/* Description */}
+                     <div className="space-y-1.5">
+                        <label className="text-xs font-bold text-gray-400 uppercase tracking-wider flex items-center gap-1.5">
+                            <AlignLeft size={12}/> Description
+                        </label>
+                        <textarea 
+                            value={selectedTask.description}
+                            onChange={(e) => handleInputChange('description', e.target.value)}
+                            rows={4}
+                            className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm text-slate-600 focus:ring-2 focus:ring-pink-300 outline-none transition-all focus:bg-white resize-none leading-relaxed"
+                            placeholder="Enter task description..."
+                        />
                     </div>
                     
                     <div className="pt-4 border-t border-slate-100">
-                        <div className="flex items-center gap-2 text-xs text-gray-400">
-                             <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse"></span>
-                             Changes auto-save
+                        <div className="flex items-center gap-2 text-xs text-gray-400 bg-green-50 px-3 py-2 rounded-lg border border-green-100 text-green-700 font-medium">
+                             <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></span>
+                             Auto-saved to workspace
                         </div>
                     </div>
                  </div>

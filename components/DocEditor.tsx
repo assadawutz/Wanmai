@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { 
   Bold, Italic, Underline, AlignLeft, AlignCenter, AlignRight, 
   List, ListOrdered, Save, ArrowLeft, Trash2, Share2, FileText, Plus, Search, Clock, Cloud,
-  X, Undo, Redo, Link as LinkIcon, Image as ImageIcon, Printer
+  X, Undo, Redo, Link as LinkIcon, Image as ImageIcon, Printer, Table
 } from 'lucide-react';
 import { Doc } from '../types';
 import { WorkspaceService } from '../services/workspaceService';
@@ -94,6 +94,34 @@ export const DocEditor: React.FC = () => {
   const insertImage = () => {
     const url = prompt('Enter Image URL:', 'https://via.placeholder.com/150');
     if (url) execCmd('insertImage', url);
+  };
+
+  const insertTable = () => {
+    const tableHTML = `
+      <table style="border-collapse: collapse; width: 100%; margin: 1em 0;">
+        <thead>
+          <tr style="background-color: #f8fafc;">
+            <th style="border: 1px solid #cbd5e1; padding: 8px;">Header 1</th>
+            <th style="border: 1px solid #cbd5e1; padding: 8px;">Header 2</th>
+            <th style="border: 1px solid #cbd5e1; padding: 8px;">Header 3</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td style="border: 1px solid #cbd5e1; padding: 8px;">Cell 1</td>
+            <td style="border: 1px solid #cbd5e1; padding: 8px;">Cell 2</td>
+            <td style="border: 1px solid #cbd5e1; padding: 8px;">Cell 3</td>
+          </tr>
+          <tr>
+            <td style="border: 1px solid #cbd5e1; padding: 8px;">Cell 4</td>
+            <td style="border: 1px solid #cbd5e1; padding: 8px;">Cell 5</td>
+            <td style="border: 1px solid #cbd5e1; padding: 8px;">Cell 6</td>
+          </tr>
+        </tbody>
+      </table>
+      <p><br /></p>
+    `;
+    execCmd('insertHTML', tableHTML);
   };
 
   const handlePrint = () => {
@@ -229,6 +257,7 @@ export const DocEditor: React.FC = () => {
          <div className="w-px h-5 bg-gray-200 mx-3" />
          <ToolbarBtn icon={LinkIcon} action={insertLink} />
          <ToolbarBtn icon={ImageIcon} action={insertImage} />
+         <ToolbarBtn icon={Table} action={insertTable} />
          <div className="w-px h-5 bg-gray-200 mx-3" />
          <select onChange={(e) => execCmd('formatBlock', e.target.value)} className="bg-gray-50 border border-gray-200 rounded-lg px-3 py-1.5 text-xs font-bold text-gray-600 focus:outline-none focus:border-pink-300 ml-2 shadow-sm cursor-pointer hover:bg-gray-100 transition-colors">
            <option value="p">Normal</option>
