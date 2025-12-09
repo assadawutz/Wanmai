@@ -1,9 +1,13 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { 
   Bold, Italic, Underline, AlignLeft, AlignCenter, AlignRight, 
   List, ListOrdered, Save, ArrowLeft, Trash2, Share2, FileText, Plus, Search, Clock, Cloud,
-  X, Undo, Redo, Link as LinkIcon, Image as ImageIcon, Printer, Table
+  X, Undo, Redo, Link as LinkIcon, Image as ImageIcon, Printer, Table,
+  BarChart2, ChevronUp, ChevronDown
 } from 'lucide-react';
+import { 
+  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer 
+} from 'recharts';
 import { Doc } from '../types';
 import { WorkspaceService } from '../services/workspaceService';
 
@@ -18,6 +22,7 @@ export const DocEditor: React.FC = () => {
   const [editorTitle, setEditorTitle] = useState('');
   const [isSaving, setIsSaving] = useState(false);
   const [showShareModal, setShowShareModal] = useState(false);
+  const [showStats, setShowStats] = useState(true);
 
   // Fetch docs on mount
   useEffect(() => {
@@ -30,6 +35,28 @@ export const DocEditor: React.FC = () => {
     setDocs(fetchedDocs);
     setLoading(false);
   };
+
+  const chartData = useMemo(() => {
+    const data: Record<string, { date: string; Draft: number; Review: number; Final: number }> = {};
+    
+    // Sort to ensure chronological order on x-axis
+    const sortedDocs = [...docs].sort((a, b) => new Date(a.lastModified).getTime() - new Date(b.lastModified).getTime());
+
+    sortedDocs.forEach(doc => {
+        // Group by Day for granular view
+        const dateObj = new Date(doc.lastModified);
+        const dateKey = dateObj.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+        
+        if (!data[dateKey]) {
+            data[dateKey] = { date: dateKey, Draft: 0, Review: 0, Final: 0 };
+        }
+        if (['Draft', 'Review', 'Final'].includes(doc.status)) {
+            data[dateKey][doc.status as 'Draft' | 'Review' | 'Final'] += 1;
+        }
+    });
+
+    return Object.values(data);
+  }, [docs]);
 
   const handleCreateDoc = async () => {
     const newDoc: Doc = {
@@ -150,6 +177,13 @@ export const DocEditor: React.FC = () => {
             <p className="text-sm text-gray-500 font-medium">Knowledge Base & Requirements.</p>
           </div>
           <div className="flex w-full sm:w-auto items-center gap-3">
+             <button 
+                onClick={() => setShowStats(!showStats)}
+                className={`p-2.5 rounded-xl border transition-all ${showStats ? 'bg-pink-50 border-pink-200 text-pink-600' : 'bg-white border-white text-gray-400 hover:text-gray-600'}`}
+                title="Toggle Stats"
+             >
+                <BarChart2 size={18} />
+             </button>
              <div className="relative flex-1 sm:flex-none">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
                 <input 
@@ -168,6 +202,34 @@ export const DocEditor: React.FC = () => {
              </button>
           </div>
         </div>
+
+        {/* Stats Chart Section */}
+        {showStats && chartData.length > 0 && (
+            <div className="border-b border-pink-50 bg-white/40 p-6 animate-slide-up">
+                <div className="flex items-center justify-between mb-2">
+                    <h3 className="text-xs font-bold text-slate-500 uppercase tracking-wider flex items-center gap-2">
+                        <BarChart2 size={14} className="text-pink-500"/> Activity Overview
+                    </h3>
+                </div>
+                <div className="h-40 w-full">
+                    <ResponsiveContainer width="100%" height="100%">
+                        <BarChart data={chartData} margin={{top: 5, right: 0, bottom: 0, left: -20}}>
+                            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                            <XAxis dataKey="date" axisLine={false} tickLine={false} tick={{fontSize: 10, fill: '#94a3b8', fontWeight: 600}} dy={5} />
+                            <YAxis axisLine={false} tickLine={false} tick={{fontSize: 10, fill: '#94a3b8'}} allowDecimals={false} />
+                            <Tooltip 
+                                contentStyle={{borderRadius: '12px', border: 'none', boxShadow: '0 4px 20px rgba(0,0,0,0.08)', fontSize: '12px'}} 
+                                cursor={{fill: '#f8fafc'}}
+                            />
+                            <Legend iconType="circle" wrapperStyle={{fontSize: '10px', paddingTop: '10px'}} />
+                            <Bar dataKey="Final" stackId="a" fill="#14b8a6" radius={[0, 0, 0, 0]} barSize={40} />
+                            <Bar dataKey="Review" stackId="a" fill="#f59e0b" radius={[0, 0, 0, 0]} barSize={40} />
+                            <Bar dataKey="Draft" stackId="a" fill="#94a3b8" radius={[6, 6, 0, 0]} barSize={40} />
+                        </BarChart>
+                    </ResponsiveContainer>
+                </div>
+            </div>
+        )}
 
         {/* Grid */}
         <div className="p-6 overflow-y-auto flex-1 bg-pink-50/20">
@@ -197,7 +259,9 @@ export const DocEditor: React.FC = () => {
                       <div className="flex items-center gap-2 text-[10px] text-gray-400 font-medium mt-3">
                         <Clock size={10} /> {new Date(doc.lastModified).toLocaleDateString()}
                         <span className={`ml-auto px-2 py-0.5 rounded-full uppercase tracking-wider font-bold border ${
-                          doc.status === 'Final' ? 'bg-teal-50 text-teal-600 border-teal-100' : 'bg-amber-50 text-amber-600 border-amber-100'
+                          doc.status === 'Final' ? 'bg-teal-50 text-teal-600 border-teal-100' : 
+                          doc.status === 'Review' ? 'bg-amber-50 text-amber-600 border-amber-100' :
+                          'bg-slate-100 text-slate-500 border-slate-200'
                         }`}>{doc.status}</span>
                       </div>
                     </div>
