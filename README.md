@@ -1,20 +1,73 @@
-<div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
-</div>
+# Wanmai
 
-# Run and deploy your AI Studio app
+Wanmai is a production-oriented, local-first SaaS workspace built with **Next.js Pages Router + TypeScript strict + Tailwind v4**.
+It combines SaaS workspace management and Wanmai domain workflows for source intake, understanding, build surfaces, operations, and readiness-gated output.
 
-This contains everything you need to run your app locally.
+## Architecture
 
-View your app in AI Studio: https://ai.studio/apps/drive/12ZM6LSL6n7gfr3lGpC9ljvOYvR32lesN
+- **SaaS shell:** account/workspace/team/settings/notifications/jobs/usage/audit-ready structure.
+- **Wanmai domain:** intake → understand → build → review → operate → role workbenches.
+- **State model:** strongly typed root model in `types/workspace.ts`, persisted with defensive recovery.
+- **Prompt/rule registry:** `lib/prompts.ts`, `lib/rules.ts`, `types/agents.ts`.
 
-## Run Locally
+## Route map
 
-**Prerequisites:**  Node.js
+Canonical route map is in `lib/route-definitions.ts` and reachable through `/w/[workspaceId]/[[...slug]]`.
+See `docs/ROUTE_MAP.md` for route grouping.
 
+## Setup
 
-1. Install dependencies:
-   `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
-3. Run the app:
-   `npm run dev`
+```bash
+npm install
+cp .env.example .env.local
+npm run dev
+```
+
+## Environment variables
+
+Defined in `.env.example`:
+- `NEXT_PUBLIC_APP_NAME`
+- `NEXT_PUBLIC_DEFAULT_WORKSPACE`
+- `WANMAI_STORAGE_MODE`
+
+## Commands
+
+- `npm run dev`
+- `npm run lint`
+- `npm run type-check`
+- `npm test`
+- `npm run build`
+- `npm run validate:all`
+- `npm run smoke:routes`
+- `npm run smoke:degraded`
+- `npm run smoke:export`
+- `npm run smoke:history`
+- `npm run smoke:readiness`
+
+## Quality gates
+
+Use `npm run validate:all` and all `smoke:*` commands before deployment.
+
+## Degraded mode
+
+When runtime/integration fails, Wanmai remains usable with local-first persistence, warnings, and manual workflows.
+
+## History / restore
+
+Snapshots are available via review history; restore paths are guarded and preserve recoverability.
+
+## Readiness / export
+
+Readiness verdicts and validation policies must pass before external presentation/export.
+
+## Vercel deployment
+
+This repo includes `vercel.json`, `.vercelignore`, and `.env.example` for clean deployment.
+Link and deploy with:
+
+```bash
+npx vercel link
+npx vercel --prod
+```
+
+If Vercel auth is unavailable, keep local gates green and deploy once credentials are provided.

@@ -1,14 +1,20 @@
 {
   "name": "wanmai-workspace-studio",
   "private": true,
-  "version": "1.0.0",
+  "version": "1.0.1",
   "scripts": {
     "dev": "next dev",
     "build": "tsc --noEmit",
     "start": "next start",
     "lint": "tsc --noEmit",
     "type-check": "tsc --noEmit",
-    "test": "node --test tests/smoke.test.js"
+    "test": "node --test tests/smoke.test.js",
+    "validate:all": "npm run lint && npm run type-check && npm run test && npm run build",
+    "smoke:routes": "node scripts/smoke-routes.js",
+    "smoke:degraded": "node scripts/smoke-degraded.js",
+    "smoke:export": "node scripts/smoke-export.js",
+    "smoke:history": "node scripts/smoke-history.js",
+    "smoke:readiness": "node scripts/smoke-readiness.js"
   },
   "dependencies": {},
   "devDependencies": {}
