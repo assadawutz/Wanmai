@@ -3,6 +3,7 @@ import { exportWorkspace } from '../lib/export';
 import { runAgents } from '../lib/agents';
 import { menuGroups, menuMap, type WorkspaceFeatureDefinition } from '../lib/menu-map';
 import { globalFallbackPolicy, globalQualityJudgmentPolicy, masterFeatureTable } from '../lib/master-feature-table';
+import { outputContractSections, prePushBuildGates, shareReadinessLabels } from '../lib/part3-policy';
 import { useWorkspace } from '../lib/workspace-context';
 import type { WorkspaceInput } from '../types/workspace';
 import { Panel } from './ui/Panel';
@@ -13,10 +14,10 @@ function readinessFromState(featureId: string, hasFiles: boolean, validationCoun
   const bonus = featureId.includes('runtime') || featureId.includes('history') ? 8 : 0;
   const score = Math.max(30, Math.min(98, baseline - penalty + bonus));
 
-  if (score >= 85) return { score, label: 'Ready for share' };
-  if (score >= 70) return { score, label: 'Near ready' };
-  if (score >= 55) return { score, label: 'Needs improvement' };
-  return { score, label: 'Not ready' };
+  if (score >= 85) return { score, label: shareReadinessLabels[0] };
+  if (score >= 70) return { score, label: shareReadinessLabels[1] };
+  if (score >= 55) return { score, label: shareReadinessLabels[2] };
+  return { score, label: shareReadinessLabels[3] };
 }
 
 function FeatureContract({ feature, hasFiles, validationCount }: { feature: WorkspaceFeatureDefinition; hasFiles: boolean; validationCount: number }): JSX.Element {
@@ -31,6 +32,7 @@ function FeatureContract({ feature, hasFiles, validationCount }: { feature: Work
       <Panel title="Route / Surface">
         <p className="text-sm"><b>Route:</b> {spec?.route ?? 'N/A'}</p>
         <p className="mt-1 text-sm"><b>Intent:</b> {spec?.lockedPromptIntent ?? 'Context-aware feature output contract.'}</p>
+        <p className="mt-1 text-xs"><b>Locked contract:</b> {outputContractSections.length} required sections.</p>
       </Panel>
       <Panel title="What matters most">
         <ul className="list-disc space-y-1 pl-5 text-sm">
@@ -86,7 +88,7 @@ function FeatureContract({ feature, hasFiles, validationCount }: { feature: Work
           <span className="ml-2">{readiness.label}</span>
         </p>
       </Panel>
-      <Panel title="If not ready, exact improvement path">
+      <Panel title="Exact improvement path if not ready">
         <ol className="list-decimal space-y-1 pl-5 text-sm">
           {(spec?.fallback ?? globalFallbackPolicy).slice(0, 4).map((item) => (
             <li key={`${feature.id}-fallback-${item}`}>{item}</li>
@@ -151,6 +153,11 @@ export function WorkspaceModules(): JSX.Element {
               <li>Runtime: degraded-safe mode available</li>
             </ul>
           </Panel>
+          <Panel title="Pre-push production gates">
+            <ul className="space-y-1 text-sm">
+              {prePushBuildGates.map((gate) => <li key={gate}>• {gate}</li>)}
+            </ul>
+          </Panel>
         </div>
       );
     }
@@ -204,6 +211,7 @@ export function WorkspaceModules(): JSX.Element {
             </div>
           ))}
           {state.summaries.length === 0 && <p className="text-sm">No extracted summary yet. Upload files to generate analysis.</p>}
+          <p className="mt-2 text-xs text-rose-900">Fact vs interpretation rule: extracted facts, inferred interpretation, and recommendations are shown as separate layers.</p>
         </Panel>
       );
     }
