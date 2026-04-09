@@ -44,7 +44,9 @@ export default function HomePage(): JSX.Element {
           <p>Theme: {state.customization.theme}</p>
           <p>Density: {state.customization.density}</p>
           <p>Motion: {state.customization.motion}</p>
-          <p>Runtime: Degraded-safe policy active</p>
+          <p>Runtime provider: {state.runtime.provider}</p>
+          <p>Runtime state: {state.runtime.state}</p>
+          <p>{state.runtime.degradedNotice}</p>
         </div>
       }
       bottom={
@@ -53,6 +55,7 @@ export default function HomePage(): JSX.Element {
           <span>Snapshots: {state.history.length}</span>
           <span>Validation: {state.validation.length}</span>
           <span>Source files: {state.sourceFiles.length}</span>
+          <span>Action Center: {state.actionCenter.length}</span>
         </div>
       }
     />

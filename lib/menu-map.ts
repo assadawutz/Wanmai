@@ -18,7 +18,7 @@ const defaultOutputs = [
   'Next actions',
   'Overall summary',
   'Readiness / quality judgment',
-  'If not ready, exact improvement path'
+  'Exact improvement path if not ready'
 ];
 
 export const menuMap: WorkspaceFeatureDefinition[] = [
