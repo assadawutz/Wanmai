@@ -1,12 +1,12 @@
 {
   "name": "wanmai-workspace-studio",
   "private": true,
-  "version": "1.0.1",
+  "version": "1.1.0",
   "scripts": {
     "dev": "next dev",
-    "build": "tsc --noEmit",
+    "build": "next build",
     "start": "next start",
-    "lint": "tsc --noEmit",
+    "lint": "next lint",
     "type-check": "tsc --noEmit",
     "test": "node --test tests/smoke.test.js",
     "validate:all": "npm run lint && npm run type-check && npm run test && npm run build",
@@ -16,6 +16,22 @@
     "smoke:history": "node scripts/smoke-history.js",
     "smoke:readiness": "node scripts/smoke-readiness.js"
   },
-  "dependencies": {},
-  "devDependencies": {}
+  "dependencies": {
+    "@tanstack/react-query": "^5.85.3",
+    "next": "^14.2.33",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-hook-form": "^7.62.0",
+    "zod": "^3.25.76",
+    "zustand": "^5.0.7"
+  },
+  "devDependencies": {
+    "@types/node": "^22.17.2",
+    "@types/react": "^18.3.24",
+    "@types/react-dom": "^18.3.7",
+    "eslint": "^8.57.1",
+    "eslint-config-next": "^14.2.33",
+    "tailwindcss": "^4.1.12",
+    "typescript": "^5.9.2"
+  }
 }
