@@ -1,0 +1,20 @@
+@import "tailwindcss";
+
+:root {
+  --surface-base: #fffafc;
+  --surface-layer1: #fff2f8;
+  --surface-layer2: #ffe9f3;
+  --surface-card: #ffffff;
+  --text-body: #3e2d3a;
+  --text-heading: #2e1f2a;
+  --border-soft: #f2dce8;
+  --primary: #c05a95;
+}
+
+html, body, #__next { height: 100%; }
+body { background: radial-gradient(circle at top right, var(--surface-layer2), var(--surface-base)); color: var(--text-body); }
+.panel { @apply rounded-2xl border p-3 shadow-sm bg-white/90 backdrop-blur-sm; border-color: var(--border-soft); }
+.btn { @apply rounded-xl px-3 py-2 text-sm font-medium transition; }
+.btn-primary { background: var(--primary); color: white; }
+.btn-soft { @apply bg-white hover:bg-rose-50; }
+.input { @apply w-full rounded-xl border px-3 py-2 text-sm; border-color: var(--border-soft); }
