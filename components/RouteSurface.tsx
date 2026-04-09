@@ -12,47 +12,85 @@ export interface RouteSurfaceProps {
 }
 
 const topLinks = [
-  { href: '/w/workspace-1/home', label: 'Home' },
-  { href: '/w/workspace-1/intake', label: 'Intake' },
-  { href: '/w/workspace-1/understand/summary', label: 'Understand' },
-  { href: '/w/workspace-1/build/docs', label: 'Build' },
-  { href: '/w/workspace-1/review/preview', label: 'Review' },
-  { href: '/w/workspace-1/operate/issues', label: 'Operate' },
-  { href: '/w/workspace-1/roles/proposal', label: 'Roles' },
-  { href: '/w/workspace-1/system/runtime', label: 'System' }
+  { href: '/app/workspace-1/wanmai/home', label: 'Home' },
+  { href: '/app/workspace-1/wanmai/intake', label: 'Intake' },
+  { href: '/app/workspace-1/wanmai/understand/summary', label: 'Understand' },
+  { href: '/app/workspace-1/wanmai/build/docs', label: 'Build' },
+  { href: '/app/workspace-1/wanmai/review/preview', label: 'Review' },
+  { href: '/app/workspace-1/wanmai/operate/issues', label: 'Operate' },
+  { href: '/app/workspace-1/wanmai/roles/proposal', label: 'Roles' },
+  { href: '/app/workspace-1/wanmai/system/runtime', label: 'System' }
 ];
 
 const deskNav = [
   {
     section: 'Workspace',
     items: [
-      { href: '/w/workspace-1/home', label: 'Overview' },
-      { href: '/w/workspace-1/notifications', label: 'Notifications' },
-      { href: '/w/workspace-1/jobs', label: 'Jobs & Logs' },
-      { href: '/w/workspace-1/settings', label: 'Settings' }
+      { href: '/app/workspace-1/overview', label: 'Overview' },
+      { href: '/app/workspace-1/notifications', label: 'Notifications' },
+      { href: '/app/workspace-1/jobs', label: 'Jobs & Logs' },
+      { href: '/app/workspace-1/settings/general', label: 'Settings' }
     ]
   },
   {
     section: 'Wanmai',
     items: [
-      { href: '/w/workspace-1/intake', label: 'Intake Hub' },
-      { href: '/w/workspace-1/understand/reader', label: 'Reader' },
-      { href: '/w/workspace-1/build/docs', label: 'Smart Docs' },
-      { href: '/w/workspace-1/build/slides', label: 'Smart Slides' },
-      { href: '/w/workspace-1/build/mermaid', label: 'Mermaid Studio' },
-      { href: '/w/workspace-1/review/export', label: 'Export Center' }
+      { href: '/app/workspace-1/wanmai/intake', label: 'Intake Hub' },
+      { href: '/app/workspace-1/wanmai/understand/reader/src-1', label: 'Reader' },
+      { href: '/app/workspace-1/wanmai/build/docs', label: 'Smart Docs' },
+      { href: '/app/workspace-1/wanmai/build/slides', label: 'Smart Slides' },
+      { href: '/app/workspace-1/wanmai/build/mermaid', label: 'Mermaid Studio' },
+      { href: '/app/workspace-1/wanmai/review/export', label: 'Export Center' }
     ]
   }
 ];
 
-const homeActionCards = [
-  { title: 'Continue latest draft', caption: 'Resume your most recent document safely.' },
-  { title: 'Run readiness check', caption: 'Review confidence, gaps, and exact fix path.' },
-  { title: 'Prepare proposal package', caption: 'Bundle summary, slides, and export deliverables.' }
-];
-
 function cleanFeatureId(value: string): string {
   return value.toLowerCase().replace(/([A-Z])/g, '-$1');
+}
+
+function getJourneyCards(route: string): { title: string; caption: string }[] {
+  if (route.includes('/intake')) {
+    return [
+      { title: 'Drop source files', caption: 'Queue uploads and preserve originals for safe retries.' },
+      { title: 'Validate extraction', caption: 'Review low-confidence sections before summary generation.' },
+      { title: 'Continue to Understand', caption: 'Promote validated sources into reader and summary.' }
+    ];
+  }
+  if (route.includes('/understand')) {
+    return [
+      { title: 'Evidence-first reading', caption: 'Keep facts and interpretation separated for safer outputs.' },
+      { title: 'Entity and trace checks', caption: 'Confirm names, dates, and claims against source traces.' },
+      { title: 'Promote insight blocks', caption: 'Send validated insights to docs, slides, and operations.' }
+    ];
+  }
+  if (route.includes('/build')) {
+    return [
+      { title: 'Compose artifacts quickly', caption: 'Use summaries, evidence, and templates to build outputs.' },
+      { title: 'Autosave and rollback safety', caption: 'Every edit is snapshot-safe and recoverable.' },
+      { title: 'Prepare for review', caption: 'Run preview and readiness before presentation/export.' }
+    ];
+  }
+  if (route.includes('/review')) {
+    return [
+      { title: 'Preview all artifacts', caption: 'Check readability and layout across mobile and desktop.' },
+      { title: 'Readiness with exact fix path', caption: 'Get explicit blockers, not generic confidence claims.' },
+      { title: 'Export safely', caption: 'Retry failed exports without losing any prior result.' }
+    ];
+  }
+  if (route.includes('/operate')) {
+    return [
+      { title: 'Track risk and issues', caption: 'Keep RAID, issues, and dependencies visible and linked.' },
+      { title: 'Control approvals', caption: 'Use explicit approval states with ownership and next actions.' },
+      { title: 'Plan releases', caption: 'Coordinate timeline, resources, and release gates together.' }
+    ];
+  }
+
+  return [
+    { title: 'Continue latest draft', caption: 'Resume your most recent document safely.' },
+    { title: 'Run readiness check', caption: 'Review confidence, gaps, and exact fix path.' },
+    { title: 'Prepare proposal package', caption: 'Bundle summary, slides, and export deliverables.' }
+  ];
 }
 
 export function RouteSurface({ route, title, description, nextStep, featureKey }: RouteSurfaceProps): JSX.Element {
@@ -60,13 +98,14 @@ export function RouteSurface({ route, title, description, nextStep, featureKey }
   const hasData = state.sourceFiles.length > 0;
   const validationErrors = state.validation.filter((item) => item.severity === 'error').length;
   const unresolvedWarnings = state.validation.filter((item) => item.severity !== 'error').length;
+  const openActions = state.actionCenter.filter((item) => item.status === 'open').slice(0, 3);
 
   const feature = useMemo(
     () => menuMap.find((item) => cleanFeatureId(item.id).includes(cleanFeatureId(featureKey))),
     [featureKey]
   );
 
-  const pathGroup = route.split('/')[1] || 'home';
+  const journeyCards = useMemo(() => getJourneyCards(route), [route]);
 
   return (
     <main className="min-h-screen">
@@ -110,11 +149,10 @@ export function RouteSurface({ route, title, description, nextStep, featureKey }
 
             <article className="space-y-3">
               <div className="panel">
-                <p className="text-xs font-semibold uppercase tracking-wide text-rose-700">{pathGroup} surface</p>
                 <h2 className="mt-1 text-2xl font-semibold text-[var(--text-heading)]">{title}</h2>
                 <p className="mt-2 text-sm">{description}</p>
                 <div className="mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
-                  {homeActionCards.map((card) => (
+                  {journeyCards.map((card) => (
                     <div key={card.title} className="rounded-2xl border border-[var(--border-soft)] bg-white p-3">
                       <p className="font-semibold text-[var(--text-heading)]">{card.title}</p>
                       <p className="mt-1 text-sm">{card.caption}</p>
@@ -136,20 +174,25 @@ export function RouteSurface({ route, title, description, nextStep, featureKey }
                   </div>
                 </div>
                 <div className="mt-3 flex flex-wrap gap-2">
-                  <Link href="/w/workspace-1/intake" className="btn btn-primary">Add source</Link>
-                  <Link href="/w/workspace-1/review/readiness" className="btn btn-soft">Open readiness</Link>
-                  <Link href="/w/workspace-1/review/history" className="btn btn-soft">History & restore</Link>
+                  <Link href="/app/workspace-1/wanmai/intake" className="btn btn-primary">Add source</Link>
+                  <Link href="/app/workspace-1/wanmai/review/readiness" className="btn btn-soft">Open readiness</Link>
+                  <Link href="/app/workspace-1/wanmai/review/history" className="btn btn-soft">History & restore</Link>
                 </div>
               </div>
             </article>
 
             <aside className="space-y-3">
               <div className="panel">
-                <p className="text-xs font-semibold uppercase tracking-wide text-rose-700">Recent activity</p>
+                <p className="text-xs font-semibold uppercase tracking-wide text-rose-700">Action center</p>
                 <ul className="mt-2 space-y-2 text-sm">
-                  <li className="rounded-xl bg-white p-2">Summary updated from latest source extraction.</li>
-                  <li className="rounded-xl bg-white p-2">One export package ready for retry-safe delivery.</li>
-                  <li className="rounded-xl bg-white p-2">Proposal workspace synced with current insights.</li>
+                  {openActions.length > 0 ? openActions.map((item) => (
+                    <li key={item.id} className="rounded-xl bg-white p-2">
+                      <p className="font-semibold text-[var(--text-heading)]">{item.title}</p>
+                      <p className="text-xs text-slate-600">{item.description}</p>
+                    </li>
+                  )) : (
+                    <li className="rounded-xl bg-white p-2">No open actions. Start by importing sources in Intake.</li>
+                  )}
                 </ul>
               </div>
               <div className="panel">

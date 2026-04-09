@@ -91,4 +91,54 @@ export const routeDefinitions: Record<string, RouteDefinition> = {
 };
 
 
+const routeAliases: Record<string, RouteDefinition> = {
+  '/reader': routeDefinitions['/understand/reader'],
+  '/reader/structure': routeDefinitions['/understand/structure/[sourceId]'],
+  '/reader/entities': routeDefinitions['/understand/entities'],
+  '/reader/trace': routeDefinitions['/understand/source-trace'],
+  '/summary': routeDefinitions['/understand/summary'],
+  '/summary/insights': routeDefinitions['/understand/insights'],
+  '/summary/validation': routeDefinitions['/understand/validation'],
+  '/docs': routeDefinitions['/build/docs'],
+  '/docs/[docId]': routeDefinitions['/build/docs/[docId]'],
+  '/sheets': routeDefinitions['/build/sheets'],
+  '/sheets/[sheetId]': routeDefinitions['/build/sheets/[sheetId]'],
+  '/slides': routeDefinitions['/build/slides'],
+  '/slides/[deckId]': routeDefinitions['/build/slides/[deckId]'],
+  '/boards': routeDefinitions['/build/board'],
+  '/boards/[boardId]': routeDefinitions['/build/board/[boardId]'],
+  '/canvas': routeDefinitions['/build/canvas'],
+  '/canvas/[canvasId]': routeDefinitions['/build/canvas/[canvasId]'],
+  '/flow': routeDefinitions['/build/flow'],
+  '/flow/[flowId]': routeDefinitions['/build/flow/[flowId]'],
+  '/mermaid': routeDefinitions['/build/mermaid'],
+  '/mermaid/[diagramId]': routeDefinitions['/build/mermaid/[diagramId]'],
+  '/storyboard': routeDefinitions['/build/storyboard'],
+  '/storyboard/[storyId]': routeDefinitions['/build/storyboard/[storyId]'],
+  '/present/build': routeDefinitions['/build/presentation'],
+  '/present/[presentationId]': routeDefinitions['/build/presentation/[presentationId]'],
+  '/review/present': routeDefinitions['/review/presentation'],
+  '/ops/issues': routeDefinitions['/operate/issues'],
+  '/ops/raid': routeDefinitions['/operate/raid'],
+  '/ops/decisions': routeDefinitions['/operate/decisions'],
+  '/ops/dependencies': routeDefinitions['/operate/dependencies'],
+  '/ops/changes': routeDefinitions['/operate/change-control'],
+  '/ops/resources': routeDefinitions['/operate/resources'],
+  '/ops/timeline': routeDefinitions['/operate/timeline'],
+  '/ops/budget': routeDefinitions['/operate/budget-impact'],
+  '/ops/approvals': routeDefinitions['/operate/approvals'],
+  '/ops/meetings': routeDefinitions['/operate/meetings-actions'],
+  '/ops/releases': routeDefinitions['/operate/releases'],
+  '/ops/system': routeDefinitions['/operate/api-system-map'],
+  '/workbench/pm': routeDefinitions['/roles/pm'],
+  '/workbench/technical': routeDefinitions['/roles/technical'],
+  '/workbench/sales': routeDefinitions['/roles/sales'],
+  '/workbench/executive': routeDefinitions['/roles/executive'],
+  '/workbench/proposal': routeDefinitions['/roles/proposal'],
+  '/system/ai': routeDefinitions['/system/runtime'],
+  '/system/jobs': routeDefinitions['/system/logs-jobs']
+};
+
+Object.assign(routeDefinitions, routeAliases);
+
 export type RouteKey = keyof typeof routeDefinitions;
