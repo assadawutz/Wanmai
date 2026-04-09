@@ -12,7 +12,7 @@ It combines SaaS workspace management and Wanmai domain workflows for source int
 
 ## Route map
 
-Canonical route map is in `lib/route-definitions.ts` and reachable through `/w/[workspaceId]/[[...slug]]`.
+Canonical route map is in `lib/route-definitions.ts` and reachable through `/w/[workspaceId]/[[...slug]]` with a compatibility alias at `/app/[workspaceId]/[[...slug]]`.
 See `docs/ROUTE_MAP.md` for route grouping.
 
 ## Setup
