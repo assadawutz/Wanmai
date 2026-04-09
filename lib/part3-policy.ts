@@ -60,7 +60,19 @@ export const previewEvaluationDimensions = [
   'production readiness'
 ] as const;
 
-export const prePushBuildGates = ['npm install', 'npm run lint', 'npm run type-check', 'npm run build', 'npm test'] as const;
+export const prePushBuildGates = [
+  'npm install',
+  'npm run lint',
+  'npm run type-check',
+  'npm run build',
+  'npm test',
+  'npm run smoke:routes',
+  'npm run qa:no-placeholders',
+  'npm run qa:no-dead-menus',
+  'npm run smoke:degraded-mode',
+  'npm run smoke:preview-export',
+  'npm run smoke:readiness'
+] as const;
 
 export const systemAgents: AgentDefinition[] = [
   {

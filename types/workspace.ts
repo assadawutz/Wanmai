@@ -1,73 +1,295 @@
+export type IsoDateString = string;
+
+export type ParseStatus = 'queued' | 'parsing' | 'partial' | 'complete' | 'failed';
 export type ItemStatus = 'extracted' | 'confirmed' | 'edited' | 'user-added' | 'unresolved' | 'failed-extraction' | 'migrated-legacy';
-export type JobState =
-  | 'queued'
-  | 'running'
-  | 'success'
-  | 'warning'
-  | 'partial-success'
-  | 'failed'
-  | 'cancelled'
-  | 'retrying'
-  | 'fallback-running'
-  | 'fallback-success'
-  | 'fallback-failed';
 
-export type ReadinessVerdict =
-  | 'Ready to share'
-  | 'Needs minor polish'
-  | 'Needs structural rewrite'
-  | 'Not ready for external viewing';
+export type FileRole =
+  | 'report'
+  | 'executive-summary'
+  | 'meeting-notes'
+  | 'proposal'
+  | 'presentation-deck'
+  | 'spreadsheet'
+  | 'roadmap'
+  | 'architecture-doc'
+  | 'image-reference'
+  | 'transcript-source'
+  | 'mixed-material'
+  | 'unknown';
 
-export interface TraceableItem<T = unknown> {
+export interface WorkspaceMeta {
   id: string;
-  type: string;
-  label: string;
-  value: T;
-  sourceFileId?: string;
-  sourceLocation?: string;
-  parserUsed?: string;
-  confidence: number;
-  status: ItemStatus;
-  createdAt: string;
-  updatedAt: string;
-}
-
-export type RuntimeState = 'ready' | 'starting' | 'unavailable' | 'degraded' | 'failed';
-
-export interface ActionCenterItem {
-  id: string;
-  sourceAgent: string;
-  type: 'fix' | 'review' | 'approve' | 'rewrite' | 'present' | 'export' | 'retry' | 'investigate' | 'clarify' | 'redact';
-  severity: 'info' | 'warning' | 'critical';
   title: string;
   description: string;
-  linkedArtifactId?: string;
-  linkedSourceId?: string;
-  nextStep: string;
-  status: 'open' | 'in_progress' | 'blocked' | 'resolved';
-  createdAt: string;
+  createdAt: IsoDateString;
+  updatedAt: IsoDateString;
+  owner: string;
+  tags: string[];
+  themeId: string;
+  currentProjectId?: string;
+  activeArtifactId?: string;
+  activeArtifactType?: string;
+  preferredAudience?: string;
+  preferredLanguage: string;
+  preferredViewMode: 'mobile' | 'desktop' | 'auto';
+  autosaveEnabled: boolean;
+  degradedMode: boolean;
+  privacyMode: boolean;
+  startupChecksComplete: boolean;
+
+  // legacy compatibility
+  name?: string;
+  originalSchemaVersion?: number;
+  migratedSchemaVersion?: number;
+  migrationWarnings?: string[];
+  migratedAt?: IsoDateString;
 }
 
 export interface SourceFile {
   id: string;
   name: string;
+  fileType?: string;
   mimeType: string;
-  size: number;
-  role: string;
-  parser: string;
-  confidence: number;
-  status: ItemStatus;
-  rawContent: string;
+  sizeBytes?: number;
+  extension?: string;
+  sourceOrigin?: 'upload' | 'drive' | 'api' | 'import' | 'manual' | 'unknown';
+  sourceUri?: string;
+  uploadedAt?: IsoDateString;
+  uploadedBy?: string;
+  fingerprint?: string;
+  fileRole?: FileRole;
+  versionLabel?: string;
+  previousVersionId?: string;
+  parseStatus?: ParseStatus;
+  parseConfidence?: number;
+  parserUsed?: string;
+  extractionMode?: 'full' | 'partial' | 'metadata-only' | 'manual';
+  warningCodes?: string[];
+  errorMessage?: string;
+  previewAvailable?: boolean;
+  transcriptAvailable?: boolean;
+  isMergedCandidate?: boolean;
+  isDuplicateCandidate?: boolean;
+  isArchived?: boolean;
+
+  // legacy compatibility
+  size?: number;
+  role?: string;
+  parser?: string;
+  confidence?: number;
+  status?: ItemStatus;
+  rawContent?: string;
 }
 
-export interface ValidationIssue {
-  isValid: boolean;
-  code: string;
-  message: string;
-  severity: 'info' | 'warning' | 'error';
-  affectedEntityId?: string;
-  affectedFileId?: string;
-  affectedSection: string;
+export type ExtractedBlockType =
+  | 'text'
+  | 'heading'
+  | 'paragraph'
+  | 'bullet-list'
+  | 'numbered-list'
+  | 'table'
+  | 'row'
+  | 'cell'
+  | 'image'
+  | 'chart'
+  | 'metric'
+  | 'timeline-item'
+  | 'quote'
+  | 'transcript-line'
+  | 'json'
+  | 'unknown';
+
+export interface ExtractedBlock {
+  id: string;
+  sourceFileId: string;
+  type: ExtractedBlockType;
+  label: string;
+  value: string;
+  rawValue?: string;
+  normalizedValue?: string;
+  sourceLocation?: string;
+  parserUsed: string;
+  confidence: number;
+  status: ItemStatus;
+  pageNumber?: number;
+  sectionPath?: string[];
+  visualRegion?: string;
+  entityRefs: string[];
+  note?: string;
+  createdAt: IsoDateString;
+  updatedAt: IsoDateString;
+}
+
+export type EntityType =
+  | 'person'
+  | 'team'
+  | 'company'
+  | 'system'
+  | 'service'
+  | 'API'
+  | 'feature'
+  | 'requirement'
+  | 'metric'
+  | 'date'
+  | 'location'
+  | 'budget-item'
+  | 'risk'
+  | 'decision'
+  | 'task'
+  | 'milestone'
+  | 'stakeholder'
+  | 'term'
+  | 'unknown';
+
+export interface Entity {
+  id: string;
+  type: EntityType;
+  label: string;
+  value: string;
+  aliases: string[];
+  sourceFileId?: string;
+  sourceLocation?: string;
+  parserUsed?: string;
+  confidence: number;
+  status: ItemStatus;
+  linkedBlockIds: string[];
+  linkedArtifactIds: string[];
+  createdAt: IsoDateString;
+  updatedAt: IsoDateString;
+}
+
+export type SummaryType = 'quick' | 'deep' | 'executive' | 'pm' | 'technical' | 'sales' | 'proposal' | 'cross-file' | 'comparison' | 'transcript' | 'meeting-recap';
+
+export interface SummaryArtifact {
+  id: string;
+  summaryType: SummaryType;
+  title: string;
+  linkedSourceIds: string[];
+  linkedBlockIds: string[];
+  factualCore: string;
+  interpretation: string;
+  risksAndGaps: string;
+  prosAndCons: string;
+  recommendations: string;
+  nextActions: string;
+  overallSummary: string;
+  roleLens?: string;
+  readinessVerdict?: string;
+  readinessNotes?: string;
+  confidence: number;
+  createdAt: IsoDateString;
+  updatedAt: IsoDateString;
+
+  // legacy compatibility
+  label?: string;
+  value?: string;
+}
+
+export interface DocumentArtifact {
+  id: string;
+  title: string;
+  templateType:
+    | 'project-overview'
+    | 'executive-summary'
+    | 'kickoff-summary'
+    | 'scope-summary'
+    | 'delivery-plan'
+    | 'communication-plan'
+    | 'risk-report'
+    | 'stakeholder-brief'
+    | 'pm-summary'
+    | 'marketing-summary'
+    | 'sales-summary'
+    | 'proposal-summary'
+    | 'meeting-recap'
+    | 'technical-brief'
+    | 'custom';
+  sectionOrder: string[];
+  blockIds: string[];
+  linkedSourceIds: string[];
+  linkedSummaryIds: string[];
+  evidenceRefs: string[];
+  notes?: string;
+  readinessVerdict?: string;
+  exportState?: string;
+  createdAt: IsoDateString;
+  updatedAt: IsoDateString;
+
+  // legacy compatibility
+  type?: string;
+  label?: string;
+  value?: string;
+  confidence?: number;
+  status?: ItemStatus;
+}
+
+export interface SpreadsheetArtifact {
+  id: string;
+  title: string;
+  sheetTabs: SheetTab[];
+  linkedSourceIds: string[];
+  formulaMap: Record<string, string>;
+  chartRefs: string[];
+  summaryRefs: string[];
+  readinessVerdict?: string;
+  exportState?: string;
+  createdAt: IsoDateString;
+  updatedAt: IsoDateString;
+
+  // legacy compatibility
+  type?: string;
+  label?: string;
+  value?: string[][];
+  confidence?: number;
+  status?: ItemStatus;
+}
+
+export interface SheetTab {
+  id: string;
+  title: string;
+  rows: number;
+  columns: number;
+  frozenRows: number;
+  frozenColumns: number;
+  filters: string[];
+  sorts: string[];
+  validationRules: string[];
+}
+
+export interface SlideDeckArtifact {
+  id: string;
+  title: string;
+  audience: string;
+  themeId: string;
+  slideIds: string[];
+  storyline: string;
+  linkedSourceIds: string[];
+  linkedSummaryIds: string[];
+  notes?: string;
+  readinessVerdict?: string;
+  exportState?: string;
+  createdAt: IsoDateString;
+  updatedAt: IsoDateString;
+}
+
+export interface SlideArtifact {
+  id: string;
+  deckId?: string;
+  title: string;
+  layoutType: string;
+  blockIds: string[];
+  notes?: string;
+  order: number;
+  readinessNotes?: string;
+  createdAt: IsoDateString;
+  updatedAt: IsoDateString;
+
+  // legacy compatibility
+  type?: string;
+  label?: string;
+  value?: { title: string; bullets: string[] };
+  confidence?: number;
+  status?: ItemStatus;
 }
 
 export interface JobItem extends TraceableItem<string> {
