@@ -1,3 +1,5 @@
+import { universalFeatureResponseShape } from './master-feature-table';
+
 export interface WorkspaceFeatureDefinition {
   id: string;
   group: string;

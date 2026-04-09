@@ -23,28 +23,29 @@ function readinessFromState(featureId: string, hasFiles: boolean, validationCoun
 function FeatureContract({ feature, hasFiles, validationCount }: { feature: WorkspaceFeatureDefinition; hasFiles: boolean; validationCount: number }): JSX.Element {
   const readiness = readinessFromState(feature.id, hasFiles, validationCount);
   const spec = masterFeatureTable[feature.id];
+  const fallbackState = readiness.score >= 70 ? 'Ready to share with normal monitoring.' : 'Not ready; fallback-safe mode and exact fix path required before external sharing.';
 
   return (
     <div className="grid gap-3 md:grid-cols-2">
-      <Panel title="What it is">
+      <Panel title="featureIntent">
         <p className="text-sm">{spec?.coreSurface ?? feature.goal}</p>
       </Panel>
-      <Panel title="Route / Surface">
+      <Panel title="sourceContext">
         <p className="text-sm"><b>Route:</b> {spec?.route ?? 'N/A'}</p>
         <p className="mt-1 text-sm"><b>Intent:</b> {spec?.lockedPromptIntent ?? 'Context-aware feature output contract.'}</p>
         <p className="mt-1 text-xs"><b>Locked contract:</b> {outputContractSections.length} required sections.</p>
       </Panel>
-      <Panel title="What matters most">
+      <Panel title="factualCore">
         <ul className="list-disc space-y-1 pl-5 text-sm">
           {(spec?.outputs ?? feature.mustOutput).slice(0, 4).map((item) => (
             <li key={`${feature.id}-matters-${item}`}>{item}</li>
           ))}
         </ul>
       </Panel>
-      <Panel title="Detailed interpretation">
+      <Panel title="interpretation">
         <p className="text-sm">{spec?.lockedPromptIntent ?? `${feature.label} is designed as a visual-first surface with tap-first interactions, live preview, source-trace support, and runtime-safe fallbacks for degraded mode.`}</p>
       </Panel>
-      <Panel title="Risks / gaps / ambiguities">
+      <Panel title="risksAndGaps">
         <ul className="list-disc space-y-1 pl-5 text-sm">
           {(spec?.lockedRules ?? [
             'Low-confidence extraction may reduce agent recommendation quality.',
@@ -55,13 +56,13 @@ function FeatureContract({ feature, hasFiles, validationCount }: { feature: Work
           ))}
         </ul>
       </Panel>
-      <Panel title="Pros / cons">
+      <Panel title="prosAndCons">
         <div className="text-sm">
           <p><b>Pros:</b> Fast context visibility, consistent contract output, mobile-first structure.</p>
           <p className="mt-1"><b>Cons:</b> Complex modules require strong state integrity and clear fallback messaging.</p>
         </div>
       </Panel>
-      <Panel title="Recommendations">
+      <Panel title="recommendations">
         <ol className="list-decimal space-y-1 pl-5 text-sm">
           {(spec?.productionGates ?? [
             'Complete intake and source trace first for better downstream quality.',
@@ -72,17 +73,17 @@ function FeatureContract({ feature, hasFiles, validationCount }: { feature: Work
           ))}
         </ol>
       </Panel>
-      <Panel title="Next actions">
+      <Panel title="nextActions">
         <ul className="list-disc space-y-1 pl-5 text-sm">
           {(spec?.outputs ?? feature.mustOutput).slice(0, 5).map((item) => (
             <li key={`${feature.id}-next-${item}`}>Deliver: {item}</li>
           ))}
         </ul>
       </Panel>
-      <Panel title="Overall summary">
-        <p className="text-sm">{feature.label} follows the master route/surface contract with explicit fallback handling and production gates for reliability.</p>
+      <Panel title="visualOutputPlan">
+        <p className="text-sm">Prefer cards, lanes, chips, and board/graph views before long paragraphs. Use compact stacked cards on mobile and multi-panel views on desktop.</p>
       </Panel>
-      <Panel title="Readiness / quality judgment">
+      <Panel title="readinessJudgment">
         <p className="text-sm">
           <span className="inline-flex rounded-full bg-rose-100 px-2 py-1 font-semibold text-rose-700">{readiness.score}%</span>
           <span className="ml-2">{readiness.label}</span>
@@ -95,6 +96,13 @@ function FeatureContract({ feature, hasFiles, validationCount }: { feature: Work
           ))}
           <li>Quality checks: {globalQualityJudgmentPolicy.join(', ')}.</li>
         </ol>
+      </Panel>
+      <Panel title="traceLinks">
+        <ul className="list-disc space-y-1 pl-5 text-sm">
+          <li>Feature source: {spec?.route ?? 'N/A'}.</li>
+          <li>Evidence basis: {spec?.inputs.join(', ') ?? 'workspace metadata'}.</li>
+          <li>Validation references: {spec?.productionGates.join(', ') ?? 'default production checks'}.</li>
+        </ul>
       </Panel>
     </div>
   );
