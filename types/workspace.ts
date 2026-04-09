@@ -292,110 +292,8 @@ export interface SlideArtifact {
   status?: ItemStatus;
 }
 
-export interface BoardArtifact { id: string; title: string; boardType: 'one-page-summary' | 'pm-board' | 'executive-board' | 'sales-board' | 'stakeholder-board' | 'risk-board' | 'action-board' | 'launch-board' | 'planning-board' | 'custom'; widgetIds: string[]; linkedSourceIds: string[]; linkedSummaryIds: string[]; layoutState: string; readinessVerdict?: string; createdAt: IsoDateString; updatedAt: IsoDateString; }
-export interface CanvasArtifact { id: string; title: string; nodeIds: string[]; edgeIds: string[]; viewport: string; layerTree: string; linkedSourceIds: string[]; createdAt: IsoDateString; updatedAt: IsoDateString; }
-export interface FlowArtifact { id: string; title: string; flowType: 'process' | 'dependency' | 'release' | 'sales-pipeline' | 'ingestion' | 'system-map' | 'custom'; nodeIds: string[]; edgeIds: string[]; validationResults: string[]; linkedSourceIds: string[]; linkedSummaryIds: string[]; exportRefs: string[]; createdAt: IsoDateString; updatedAt: IsoDateString; }
-export interface MermaidArtifact { id: string; title: string; diagramType: 'flowchart' | 'sequenceDiagram' | 'stateDiagram-v2' | 'gantt' | 'journey' | 'classDiagram' | 'erDiagram'; code: string; linkedFlowId?: string; linkedSourceIds: string[]; validationState: string; lastValidCode?: string; renderWarnings: string[]; createdAt: IsoDateString; updatedAt: IsoDateString; }
-export interface StoryboardArtifact { id: string; title: string; sceneIds: string[]; routeEdges: string[]; linkedSourceIds: string[]; linkedDeckId?: string; readinessVerdict?: string; createdAt: IsoDateString; updatedAt: IsoDateString; }
-export interface PresentationArtifact { id: string; title: string; audience: string; sourceArtifactIds: string[]; storyline: string; sectionOrder: string[]; slideDeckId?: string; linkedStoryboardId?: string; notes?: string; readinessVerdict?: string; presentModeConfig?: string; exportState?: string; createdAt: IsoDateString; updatedAt: IsoDateString; }
-
-export interface IssueItem { id: string; title: string; description: string; severity: 'low' | 'medium' | 'high' | 'critical'; status: 'open' | 'in_progress' | 'blocked' | 'resolved'; owner?: string; dueDate?: string; linkedSourceIds: string[]; linkedDecisionIds: string[]; linkedRiskIds: string[]; createdAt: IsoDateString; updatedAt: IsoDateString; label?: string; value?: string; confidence?: number; }
-export interface RaidItem { id: string; raidType: 'risk' | 'assumption' | 'issue' | 'dependency'; title: string; description: string; impact: string; likelihood: string; severity: 'low' | 'medium' | 'high' | 'critical'; owner?: string; mitigation?: string; trigger?: string; linkedSourceIds: string[]; linkedArtifactIds: string[]; createdAt: IsoDateString; updatedAt: IsoDateString; }
-export interface DecisionItem { id: string; title: string; context: string; options: string[]; chosenOption?: string; rationale: string; impact: string; evidenceRefs: string[]; approvalState: 'pending' | 'approved' | 'rejected'; linkedSourceIds: string[]; createdAt: IsoDateString; updatedAt: IsoDateString; label?: string; value?: string; confidence?: number; }
-export interface DependencyItem { id: string; title: string; dependencyType: string; sourceRef: string; targetRef: string; severity: 'low' | 'medium' | 'high' | 'critical'; note?: string; createdAt: IsoDateString; updatedAt: IsoDateString; }
-export interface ChangeRequest { id: string; title: string; reason: string; scopeImpact: string; timelineImpact: string; budgetImpact: string; technicalImpact: string; approvalState: 'pending' | 'approved' | 'rejected'; linkedSourceIds: string[]; createdAt: IsoDateString; updatedAt: IsoDateString; }
-export interface ResourceItem { id: string; personOrRole: string; allocationPercent: number; period: string; projectRef: string; conflictState: 'none' | 'warning' | 'conflict'; createdAt: IsoDateString; updatedAt: IsoDateString; }
-export interface BudgetItem { id: string; category: string; label: string; amount: number; confidence: number; linkedSourceIds: string[]; createdAt: IsoDateString; updatedAt: IsoDateString; }
-export interface ReleaseItem { id: string; environment: string; version: string; readinessState: string; blockers: string[]; checklist: string[]; createdAt: IsoDateString; updatedAt: IsoDateString; }
-export interface ApprovalItem { id: string; artifactType: string; artifactId: string; state: 'requested' | 'approved' | 'rejected' | 'revise'; requestedBy: string; reviewedBy?: string; note?: string; createdAt: IsoDateString; updatedAt: IsoDateString; }
-
-export interface TranscriptLine { id: string; speaker: string; startMs: number; endMs: number; text: string; confidence: number; }
-export interface AudioArtifact { id: string; sourceFileId?: string; title: string; transcriptLines: TranscriptLine[]; speakerMap: Record<string, string>; speedOptions: number[]; summaryRefs: string[]; createdAt: IsoDateString; updatedAt: IsoDateString; }
-
-export interface ActionCenterItem {
-  id: string;
-  sourceAgent: string;
-  type: 'fix' | 'review' | 'approve' | 'rewrite' | 'present' | 'export' | 'retry' | 'investigate' | 'clarify' | 'redact';
-  severity: 'info' | 'warning' | 'critical' | 'error';
-  title: string;
-  description: string;
-  linkedArtifactId?: string;
-  linkedArtifactType?: string;
-  linkedSourceId?: string;
-  nextStep: string;
-  status: 'open' | 'in_progress' | 'blocked' | 'resolved' | ItemStatus;
-  createdAt: IsoDateString;
-  updatedAt?: IsoDateString;
-}
-
-export interface ReadinessReport { id: string; artifactType: string; artifactId: string; verdict: string; visualPolishScore: number; readabilityScore: number; structureScore: number; densityScore: number; audienceFitScore: number; evidenceScore: number; presentationSafetyScore: number; overallScore: number; whatWorks: string; whatFails: string; improvementPath: string; createdAt: IsoDateString; updatedAt: IsoDateString; }
-export interface ValidationResult { id: string; targetType: string; targetId: string; code: string; severity: 'info' | 'warning' | 'error'; message: string; detail: string; fixHint: string; createdAt: IsoDateString; }
-export interface WorkspaceSnapshot { id: string; label: string; createdAt: IsoDateString; createdBy?: string; snapshotVersion?: number; payloadRef?: string; validationState?: string; migrationWarnings?: string[]; state?: WorkspaceState; }
-
-export interface AiRuntimeState { provider: string; status: 'checking' | 'ready' | 'starting-local' | 'degraded' | 'failed' | 'retrying'; autoStartEnabled: boolean; localEndpoint?: string; activeModel?: string; availableModels: string[]; degradedMode: boolean; lastCheckedAt?: IsoDateString; lastError?: string; }
-export interface IntegrationState { googleAuth: string; googleDrive: string; aiRuntime: AiRuntimeState; syncState: string; lastSyncAt?: IsoDateString; warnings: string[]; }
-
-export interface WorkspaceState {
-  version: number;
-  workspaceMeta: WorkspaceMeta;
-  sourceFiles: SourceFile[];
-  extractedBlocks: ExtractedBlock[];
-  entities: Entity[];
-  summaries: SummaryArtifact[];
-  documents: DocumentArtifact[];
-  spreadsheets: SpreadsheetArtifact[];
-  slides: SlideArtifact[];
-  boards: BoardArtifact[];
-  canvases: CanvasArtifact[];
-  flows: FlowArtifact[];
-  mermaidDocuments: MermaidArtifact[];
-  storyboards: StoryboardArtifact[];
-  presentations: PresentationArtifact[];
-  issues: IssueItem[];
-  raid: RaidItem[];
-  decisions: DecisionItem[];
-  dependencies: DependencyItem[];
-  changes: ChangeRequest[];
-  resources: ResourceItem[];
-  budgets: BudgetItem[];
-  releases: ReleaseItem[];
-  approvals: ApprovalItem[];
-  audioArtifacts: AudioArtifact[];
-  actionCenter: ActionCenterItem[];
-  readinessReports: ReadinessReport[];
-  validationResults: ValidationResult[];
-  history: WorkspaceSnapshot[];
-  exports: string[];
-  integrations: IntegrationState;
-  runtime: AiRuntimeState;
-  ui: { mobile: boolean; activePanel: string; density: 'airy' | 'calm' | 'dense'; degradedShell: boolean };
-  jobs: { id: string; label: string; state: 'queued' | 'running' | 'success' | 'failed' | 'retrying' }[];
-  glossary: { id: string; term: string; definition: string }[];
-
-  // legacy compatibility aliases
-  smartDocs: DocumentArtifact[];
-  smartSheets: SpreadsheetArtifact[];
-  smartSlides: SlideArtifact[];
-  storyboard: SceneNode[];
-  processMaps: { id: string; label: string; value: string }[];
-  validation: ValidationResult[];
-  customization: { theme: string; density: 'compact' | 'comfortable'; motion: 'low' | 'normal' };
-}
-
-export type WorkspaceModel = WorkspaceState;
-
-export interface TraceableItem<T = unknown> {
-  id: string;
-  type: string;
-  label: string;
-  value: T;
-  sourceFileId?: string;
-  sourceLocation?: string;
-  parserUsed?: string;
-  confidence: number;
-  status: ItemStatus;
-  createdAt: string;
-  updatedAt: string;
+export interface JobItem extends TraceableItem<string> {
+  state: JobState;
 }
 
 export interface SceneNode extends TraceableItem<Record<string, unknown>> {
@@ -406,14 +304,35 @@ export interface SceneNode extends TraceableItem<Record<string, unknown>> {
   selected: boolean;
 }
 
-export interface ValidationIssue {
-  isValid: boolean;
-  code: string;
-  message: string;
-  severity: 'info' | 'warning' | 'error';
-  affectedEntityId?: string;
-  affectedFileId?: string;
-  affectedSection: string;
+export interface WorkspaceModel {
+  workspaceMeta: { id: string; name: string; createdAt: string; updatedAt: string; originalSchemaVersion: number; migratedSchemaVersion: number; migrationWarnings: string[]; migratedAt?: string; };
+  sourceFiles: SourceFile[];
+  extractedBlocks: TraceableItem<string>[];
+  entities: TraceableItem<string>[];
+  summaries: TraceableItem<string>[];
+  smartDocs: TraceableItem<string>[];
+  smartSheets: TraceableItem<string[][]>[];
+  smartSlides: TraceableItem<{ title: string; bullets: string[] }>[];
+  storyboard: SceneNode[];
+  processMaps: TraceableItem<string>[];
+  mermaidDocuments: TraceableItem<string>[];
+  raid: TraceableItem<string>[];
+  issues: TraceableItem<string>[];
+  decisions: TraceableItem<string>[];
+  dependencies: TraceableItem<string>[];
+  changes: TraceableItem<string>[];
+  resources: TraceableItem<string>[];
+  budgets: TraceableItem<string>[];
+  releases: TraceableItem<string>[];
+  approvals: TraceableItem<string>[];
+  audioArtifacts: TraceableItem<{ transcript: string; actions: string[] }> [];
+  history: { id: string; label: string; createdAt: string; state: WorkspaceModel }[];
+  jobs: JobItem[];
+  actionCenter: ActionCenterItem[];
+  glossary: TraceableItem<string>[];
+  validation: ValidationIssue[];
+  customization: { theme: string; density: 'compact'|'comfortable'; motion: 'low'|'normal'; };
+  runtime: { provider: 'ollama' | 'remote' | 'hybrid' | 'manual'; state: RuntimeState; modelAvailable: boolean; startupStatus: string; degradedNotice: string; };
 }
 
 export interface WorkspaceInput {
