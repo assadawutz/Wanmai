@@ -2,6 +2,46 @@ export type IsoDateString = string;
 
 export type ParseStatus = 'queued' | 'parsing' | 'partial' | 'complete' | 'failed';
 export type ItemStatus = 'extracted' | 'confirmed' | 'edited' | 'user-added' | 'unresolved' | 'failed-extraction' | 'migrated-legacy';
+export type JobState = 'queued' | 'running' | 'succeeded' | 'failed' | 'cancelled';
+export type RuntimeState = 'ready' | 'starting' | 'unavailable' | 'degraded' | 'failed';
+
+export interface TraceableItem<T = string> {
+  id: string;
+  type: string;
+  label: string;
+  value: T;
+  sourceFileId?: string;
+  sourceLocation?: string;
+  parserUsed?: string;
+  confidence: number;
+  status: ItemStatus;
+  createdAt: IsoDateString;
+  updatedAt: IsoDateString;
+}
+
+export interface ValidationIssue {
+  isValid: boolean;
+  code: string;
+  message: string;
+  severity: 'info' | 'warning' | 'error';
+  affectedSection?: string;
+  affectedFileId?: string;
+  affectedEntityId?: string;
+}
+
+export interface ActionCenterItem {
+  id: string;
+  sourceAgent: string;
+  type: 'fix' | 'review' | 'approve' | 'rewrite' | 'present' | 'export' | 'retry' | 'investigate' | 'clarify' | 'redact';
+  severity: 'info' | 'warning' | 'critical';
+  title: string;
+  description: string;
+  linkedArtifactId?: string;
+  linkedSourceId?: string;
+  nextStep: string;
+  status: 'open' | 'in_progress' | 'blocked' | 'resolved';
+  createdAt: IsoDateString;
+}
 
 export type FileRole =
   | 'report'
