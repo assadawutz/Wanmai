@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react';
 import { exportWorkspace } from '../lib/export';
 import { runAgents } from '../lib/agents';
 import { menuGroups, menuMap, type WorkspaceFeatureDefinition } from '../lib/menu-map';
+import { globalFallbackPolicy, globalQualityJudgmentPolicy, masterFeatureTable } from '../lib/master-feature-table';
 import { useWorkspace } from '../lib/workspace-context';
 import type { WorkspaceInput } from '../types/workspace';
 import { Panel } from './ui/Panel';
@@ -20,27 +21,36 @@ function readinessFromState(featureId: string, hasFiles: boolean, validationCoun
 
 function FeatureContract({ feature, hasFiles, validationCount }: { feature: WorkspaceFeatureDefinition; hasFiles: boolean; validationCount: number }): JSX.Element {
   const readiness = readinessFromState(feature.id, hasFiles, validationCount);
+  const spec = masterFeatureTable[feature.id];
 
   return (
     <div className="grid gap-3 md:grid-cols-2">
       <Panel title="What it is">
-        <p className="text-sm">{feature.goal}</p>
+        <p className="text-sm">{spec?.coreSurface ?? feature.goal}</p>
+      </Panel>
+      <Panel title="Route / Surface">
+        <p className="text-sm"><b>Route:</b> {spec?.route ?? 'N/A'}</p>
+        <p className="mt-1 text-sm"><b>Intent:</b> {spec?.lockedPromptIntent ?? 'Context-aware feature output contract.'}</p>
       </Panel>
       <Panel title="What matters most">
         <ul className="list-disc space-y-1 pl-5 text-sm">
-          {feature.mustOutput.slice(0, 4).map((item) => (
+          {(spec?.outputs ?? feature.mustOutput).slice(0, 4).map((item) => (
             <li key={`${feature.id}-matters-${item}`}>{item}</li>
           ))}
         </ul>
       </Panel>
       <Panel title="Detailed interpretation">
-        <p className="text-sm">{feature.label} is designed as a visual-first surface with tap-first interactions, live preview, source-trace support, and runtime-safe fallbacks for degraded mode.</p>
+        <p className="text-sm">{spec?.lockedPromptIntent ?? `${feature.label} is designed as a visual-first surface with tap-first interactions, live preview, source-trace support, and runtime-safe fallbacks for degraded mode.`}</p>
       </Panel>
       <Panel title="Risks / gaps / ambiguities">
         <ul className="list-disc space-y-1 pl-5 text-sm">
-          <li>Low-confidence extraction may reduce agent recommendation quality.</li>
-          <li>Cross-file mapping depends on successful ingestion and trace links.</li>
-          <li>Readiness score should be re-evaluated after each major edit.</li>
+          {(spec?.lockedRules ?? [
+            'Low-confidence extraction may reduce agent recommendation quality.',
+            'Cross-file mapping depends on successful ingestion and trace links.',
+            'Readiness score should be re-evaluated after each major edit.'
+          ]).slice(0, 4).map((rule) => (
+            <li key={`${feature.id}-rule-${rule}`}>{rule}</li>
+          ))}
         </ul>
       </Panel>
       <Panel title="Pros / cons">
@@ -51,20 +61,24 @@ function FeatureContract({ feature, hasFiles, validationCount }: { feature: Work
       </Panel>
       <Panel title="Recommendations">
         <ol className="list-decimal space-y-1 pl-5 text-sm">
-          <li>Complete intake and source trace first for better downstream quality.</li>
-          <li>Use readiness and validation together before presenting externally.</li>
-          <li>Capture snapshots before major structural edits.</li>
+          {(spec?.productionGates ?? [
+            'Complete intake and source trace first for better downstream quality.',
+            'Use readiness and validation together before presenting externally.',
+            'Capture snapshots before major structural edits.'
+          ]).slice(0, 4).map((gate) => (
+            <li key={`${feature.id}-gate-${gate}`}>{gate}</li>
+          ))}
         </ol>
       </Panel>
       <Panel title="Next actions">
         <ul className="list-disc space-y-1 pl-5 text-sm">
-          {feature.mustOutput.slice(0, 5).map((item) => (
+          {(spec?.outputs ?? feature.mustOutput).slice(0, 5).map((item) => (
             <li key={`${feature.id}-next-${item}`}>Deliver: {item}</li>
           ))}
         </ul>
       </Panel>
       <Panel title="Overall summary">
-        <p className="text-sm">{feature.label} currently runs with a locked 10-part output contract and keeps workspace continuity with explicit fallback paths.</p>
+        <p className="text-sm">{feature.label} follows the master route/surface contract with explicit fallback handling and production gates for reliability.</p>
       </Panel>
       <Panel title="Readiness / quality judgment">
         <p className="text-sm">
@@ -74,9 +88,10 @@ function FeatureContract({ feature, hasFiles, validationCount }: { feature: Work
       </Panel>
       <Panel title="If not ready, exact improvement path">
         <ol className="list-decimal space-y-1 pl-5 text-sm">
-          <li>Resolve validation warnings and parsing failures.</li>
-          <li>Strengthen source trace coverage and confidence.</li>
-          <li>Refresh summary + recommendations + readiness evaluation.</li>
+          {(spec?.fallback ?? globalFallbackPolicy).slice(0, 4).map((item) => (
+            <li key={`${feature.id}-fallback-${item}`}>{item}</li>
+          ))}
+          <li>Quality checks: {globalQualityJudgmentPolicy.join(', ')}.</li>
         </ol>
       </Panel>
     </div>
