@@ -174,11 +174,11 @@ export function WorkspaceModules(): JSX.Element {
       return (
         <Panel title="Universal Upload Intelligence">
           <div className="grid gap-2 md:grid-cols-3">
-            <input className="input" value={fileName} onChange={(e) => setFileName(e.target.value)} />
-            <input className="input" value={mimeType} onChange={(e) => setMimeType(e.target.value)} />
+            <input className="input" value={fileName} onChange={(e: any) => setFileName(e.target.value)} />
+            <input className="input" value={mimeType} onChange={(e: any) => setMimeType(e.target.value)} />
             <button className="btn btn-primary" onClick={onIngest}>Ingest</button>
           </div>
-          <textarea className="input mt-2 min-h-36" value={fileText} onChange={(e) => setFileText(e.target.value)} placeholder="Paste file content" />
+          <textarea className="input mt-2 min-h-36" value={fileText} onChange={(e: any) => setFileText(e.target.value)} placeholder="Paste file content" />
           <div className="mt-3 grid gap-2 md:grid-cols-2">
             {state.sourceFiles.map((file) => (
               <div key={file.id} className="rounded-xl border border-[var(--border-soft)] bg-white p-3 text-xs">
@@ -228,7 +228,7 @@ export function WorkspaceModules(): JSX.Element {
       const doc = state.smartDocs[0];
       return (
         <Panel title="Smart Document Editor">
-          <textarea className="input min-h-56" value={doc?.value ?? ''} onChange={(e) => doc ? dispatch({ type: 'UPDATE_DOC', id: doc.id, value: e.target.value }) : undefined} />
+          <textarea className="input min-h-56" value={doc?.value ?? ''} onChange={(e: any) => doc ? dispatch({ type: 'UPDATE_DOC', id: doc.id, value: e.target.value }) : undefined} />
         </Panel>
       );
     }
@@ -270,9 +270,9 @@ export function WorkspaceModules(): JSX.Element {
         <Panel title="Visual Board Studio / Canvas">
           <div className="grid gap-2 md:grid-cols-3">
             {dragList.map((item) => (
-              <div key={item} draggable onDragStart={(event) => event.dataTransfer.setData('text/plain', item)} className="rounded-xl border border-[var(--border-soft)] bg-white p-2 text-sm">{item}</div>
+              <div key={item} draggable onDragStart={(event: any) => event.dataTransfer.setData('text/plain', item)} className="rounded-xl border border-[var(--border-soft)] bg-white p-2 text-sm">{item}</div>
             ))}
-            <div onDragOver={(e) => e.preventDefault()} onDrop={(e) => onDrop(e.dataTransfer.getData('text/plain'))} className="rounded-xl border-2 border-dashed border-[var(--border-soft)] p-6 text-center text-sm">Drop zone with reorder</div>
+            <div onDragOver={(e: any) => e.preventDefault()} onDrop={(e: any) => onDrop(e.dataTransfer.getData('text/plain'))} className="rounded-xl border-2 border-dashed border-[var(--border-soft)] p-6 text-center text-sm">Drop zone with reorder</div>
           </div>
         </Panel>
       );
@@ -293,7 +293,7 @@ export function WorkspaceModules(): JSX.Element {
     if (selectedFeature.id === 'mermaid-studio') {
       return (
         <Panel title="Mermaid Studio">
-          <textarea className="input min-h-40" value={mermaid} onChange={(e) => setMermaid(e.target.value)} />
+          <textarea className="input min-h-40" value={mermaid} onChange={(e: any) => setMermaid(e.target.value)} />
           <p className={`mt-2 text-sm ${mermaidValid ? 'text-emerald-700' : 'text-red-700'}`}>{mermaidValid ? 'Valid diagram type detected.' : 'Parse failed. Last valid render preserved.'}</p>
         </Panel>
       );
@@ -302,7 +302,7 @@ export function WorkspaceModules(): JSX.Element {
     if (selectedFeature.id === 'meeting-action-hub') {
       return (
         <Panel title="Meeting / Action Hub">
-          <textarea className="input min-h-32" value={audioText} onChange={(e) => setAudioText(e.target.value)} />
+          <textarea className="input min-h-32" value={audioText} onChange={(e: any) => setAudioText(e.target.value)} />
           <button className="btn btn-primary mt-2" onClick={() => dispatch({ type: 'ADD_AUDIO', transcript: audioText })}>Generate Audio Summary</button>
           <ul className="mt-2 text-sm">
             {state.audioArtifacts.map((a) => <li key={a.id}>{a.label}: {a.value.actions.join(' | ') || 'No actions detected'}</li>)}
