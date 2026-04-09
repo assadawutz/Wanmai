@@ -1,6 +1,6 @@
 import Link from 'next/link';
+import { useMemo } from 'react';
 import { menuMap } from '../lib/menu-map';
-import { getScreenBlueprint } from '../lib/part7-screen-map';
 import { useWorkspace } from '../lib/workspace-context';
 
 export interface RouteSurfaceProps {
@@ -11,92 +11,165 @@ export interface RouteSurfaceProps {
   featureKey: string;
 }
 
-const globalLinks = [
-  { href: '/recent', label: 'Recent' },
-  { href: '/jobs', label: 'Jobs' },
-  { href: '/notifications', label: 'Notifications' },
-  { href: '/settings', label: 'Settings' }
+const topLinks = [
+  { href: '/w/workspace-1/home', label: 'Home' },
+  { href: '/w/workspace-1/intake', label: 'Intake' },
+  { href: '/w/workspace-1/understand/summary', label: 'Understand' },
+  { href: '/w/workspace-1/build/docs', label: 'Build' },
+  { href: '/w/workspace-1/review/preview', label: 'Review' },
+  { href: '/w/workspace-1/operate/issues', label: 'Operate' },
+  { href: '/w/workspace-1/roles/proposal', label: 'Roles' },
+  { href: '/w/workspace-1/system/runtime', label: 'System' }
 ];
+
+const deskNav = [
+  {
+    section: 'Workspace',
+    items: [
+      { href: '/w/workspace-1/home', label: 'Overview' },
+      { href: '/w/workspace-1/notifications', label: 'Notifications' },
+      { href: '/w/workspace-1/jobs', label: 'Jobs & Logs' },
+      { href: '/w/workspace-1/settings', label: 'Settings' }
+    ]
+  },
+  {
+    section: 'Wanmai',
+    items: [
+      { href: '/w/workspace-1/intake', label: 'Intake Hub' },
+      { href: '/w/workspace-1/understand/reader', label: 'Reader' },
+      { href: '/w/workspace-1/build/docs', label: 'Smart Docs' },
+      { href: '/w/workspace-1/build/slides', label: 'Smart Slides' },
+      { href: '/w/workspace-1/build/mermaid', label: 'Mermaid Studio' },
+      { href: '/w/workspace-1/review/export', label: 'Export Center' }
+    ]
+  }
+];
+
+const homeActionCards = [
+  { title: 'Continue latest draft', caption: 'Resume your most recent document safely.' },
+  { title: 'Run readiness check', caption: 'Review confidence, gaps, and exact fix path.' },
+  { title: 'Prepare proposal package', caption: 'Bundle summary, slides, and export deliverables.' }
+];
+
+function cleanFeatureId(value: string): string {
+  return value.toLowerCase().replace(/([A-Z])/g, '-$1');
+}
 
 export function RouteSurface({ route, title, description, nextStep, featureKey }: RouteSurfaceProps): JSX.Element {
   const { state } = useWorkspace();
-  const blueprint = getScreenBlueprint(route);
-  const menuFeature = menuMap.find((item) => item.id.toLowerCase().includes(featureKey.toLowerCase().replace(/([A-Z])/g, '-$1').toLowerCase()));
-  const validationErrors = state.validation.filter((item) => item.severity === 'error').length;
   const hasData = state.sourceFiles.length > 0;
+  const validationErrors = state.validation.filter((item) => item.severity === 'error').length;
+  const unresolvedWarnings = state.validation.filter((item) => item.severity !== 'error').length;
+
+  const feature = useMemo(
+    () => menuMap.find((item) => cleanFeatureId(item.id).includes(cleanFeatureId(featureKey))),
+    [featureKey]
+  );
+
+  const pathGroup = route.split('/')[1] || 'home';
 
   return (
     <main className="min-h-screen">
       <section>
-        <div className="container mx-auto px-4 py-6">
-          <div className="grid gap-4 lg:grid-cols-[1fr_320px]">
-            <article className="panel">
-              <p className="text-xs font-semibold uppercase tracking-wide text-rose-700">Wanmai Workspace Studio</p>
-              <h1 className="mt-1 text-2xl font-semibold text-[var(--text-heading)]">{title}</h1>
-              <p className="mt-2 text-sm">{description}</p>
+        <div className="container mx-auto px-4 py-4">
+          <header className="panel mb-3">
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-[0.2em] text-rose-700">Wanmai</p>
+                <h1 className="text-xl font-semibold text-[var(--text-heading)]">Soft Premium Workspace</h1>
+              </div>
+              <div className="flex items-center gap-2 text-xs">
+                <span className="rounded-full bg-rose-100 px-2 py-1">Runtime: {state.runtime.state}</span>
+                <span className="rounded-full bg-violet-100 px-2 py-1">Sources: {state.sourceFiles.length}</span>
+              </div>
+            </div>
+            <nav className="mt-3 flex gap-2 overflow-auto pb-1">
+              {topLinks.map((item) => (
+                <Link key={item.href} href={item.href} className="btn btn-soft shrink-0">
+                  {item.label}
+                </Link>
+              ))}
+            </nav>
+          </header>
 
-              <div className="mt-4 grid gap-3 md:grid-cols-2">
-                <div className="rounded-xl border border-[var(--border-soft)] bg-white p-3">
-                  <p className="text-xs font-semibold uppercase tracking-wide text-rose-700">Route status</p>
-                  <p className="mt-1 font-mono text-xs">{route}</p>
-                  <ul className="mt-2 space-y-1 text-sm">
-                    <li>Sources: {state.sourceFiles.length}</li>
-                    <li>Validation warnings: {state.validation.length}</li>
-                    <li>Critical errors: {validationErrors}</li>
-                    <li>Runtime: {state.runtime.state}</li>
-                  </ul>
+          <div className="grid gap-3 lg:grid-cols-[250px_1fr_320px]">
+            <aside className="panel hidden lg:block">
+              {deskNav.map((group) => (
+                <div key={group.section} className="mb-4">
+                  <p className="text-xs font-semibold uppercase tracking-wide text-rose-700">{group.section}</p>
+                  <div className="mt-2 grid gap-2">
+                    {group.items.map((item) => (
+                      <Link key={item.href} href={item.href} className="btn btn-soft text-left">
+                        {item.label}
+                      </Link>
+                    ))}
+                  </div>
                 </div>
-                <div className="rounded-xl border border-[var(--border-soft)] bg-white p-3">
-                  <p className="text-xs font-semibold uppercase tracking-wide text-rose-700">Readiness</p>
-                  <p className="mt-1 text-sm">{hasData ? 'Needs minor polish' : 'Needs structural rewrite'}</p>
-                  <p className="mt-2 text-sm"><b>Exact next step:</b> {nextStep}</p>
-                  <p className="mt-2 text-xs text-rose-900">If not ready: add source evidence, resolve validation, re-run preview and export checks.</p>
+              ))}
+            </aside>
+
+            <article className="space-y-3">
+              <div className="panel">
+                <p className="text-xs font-semibold uppercase tracking-wide text-rose-700">{pathGroup} surface</p>
+                <h2 className="mt-1 text-2xl font-semibold text-[var(--text-heading)]">{title}</h2>
+                <p className="mt-2 text-sm">{description}</p>
+                <div className="mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+                  {homeActionCards.map((card) => (
+                    <div key={card.title} className="rounded-2xl border border-[var(--border-soft)] bg-white p-3">
+                      <p className="font-semibold text-[var(--text-heading)]">{card.title}</p>
+                      <p className="mt-1 text-sm">{card.caption}</p>
+                    </div>
+                  ))}
                 </div>
               </div>
 
-              <div className="mt-4 grid gap-3 md:grid-cols-2">
-                <div className="rounded-xl border border-[var(--border-soft)] bg-white p-3">
-                  <p className="text-xs font-semibold uppercase tracking-wide text-rose-700">Visual-first surface</p>
-                  <p className="mt-1 text-sm">{menuFeature?.goal ?? blueprint?.purpose ?? 'Cards, boards, and traces remain visible even in degraded mode.'}</p>
-                  <ul className="mt-2 list-disc space-y-1 pl-5 text-sm">
-                    <li>Factual extraction</li>
-                    <li>Interpretation layer</li>
-                    <li>Recommendations and next actions</li>
-                    <li>Source trace links</li>
-                  </ul>
-                </div>
-                <div className="rounded-xl border border-[var(--border-soft)] bg-white p-3">
-                  <p className="text-xs font-semibold uppercase tracking-wide text-rose-700">Fallback-safe mode</p>
-                  <ul className="mt-1 list-disc space-y-1 pl-5 text-sm">
-                    <li>Original source preserved</li>
-                    <li>Partial extraction remains usable</li>
-                    <li>Retry actions always visible</li>
-                    <li>No silent failures</li>
-                  </ul>
-                  <div className="mt-3 flex flex-wrap gap-2">
-                    <Link href="/w/workspace-1/intake" className="btn btn-primary">Go to Intake</Link>
-                    <Link href="/w/workspace-1/review/readiness" className="btn btn-soft">Readiness</Link>
+              <div className="panel">
+                <h3 className="text-base font-semibold text-[var(--text-heading)]">Current module readiness</h3>
+                <div className="mt-3 grid gap-3 md:grid-cols-2">
+                  <div className="rounded-2xl border border-[var(--border-soft)] bg-white p-3 text-sm">
+                    <p><b>Intent:</b> {feature?.goal ?? 'Deliver a reliable, visual-first workspace module.'}</p>
+                    <p className="mt-2"><b>Next useful action:</b> {nextStep}</p>
                   </div>
+                  <div className="rounded-2xl border border-[var(--border-soft)] bg-white p-3 text-sm">
+                    <p><b>Readiness:</b> {hasData ? 'Needs minor polish' : 'Needs structural rewrite'}</p>
+                    <p className="mt-2">Warnings: {unresolvedWarnings} · Critical blockers: {validationErrors}</p>
+                  </div>
+                </div>
+                <div className="mt-3 flex flex-wrap gap-2">
+                  <Link href="/w/workspace-1/intake" className="btn btn-primary">Add source</Link>
+                  <Link href="/w/workspace-1/review/readiness" className="btn btn-soft">Open readiness</Link>
+                  <Link href="/w/workspace-1/review/history" className="btn btn-soft">History & restore</Link>
                 </div>
               </div>
             </article>
 
-            <aside className="panel h-fit">
-              <p className="text-xs font-semibold uppercase tracking-wide text-rose-700">Global navigation</p>
-              <div className="mt-2 grid gap-2">
-                {globalLinks.map((link) => (
-                  <Link key={link.href} href={link.href} className="btn btn-soft text-left">{link.label}</Link>
-                ))}
+            <aside className="space-y-3">
+              <div className="panel">
+                <p className="text-xs font-semibold uppercase tracking-wide text-rose-700">Recent activity</p>
+                <ul className="mt-2 space-y-2 text-sm">
+                  <li className="rounded-xl bg-white p-2">Summary updated from latest source extraction.</li>
+                  <li className="rounded-xl bg-white p-2">One export package ready for retry-safe delivery.</li>
+                  <li className="rounded-xl bg-white p-2">Proposal workspace synced with current insights.</li>
+                </ul>
               </div>
-              <p className="mt-4 text-xs font-semibold uppercase tracking-wide text-rose-700">Workspace quick links</p>
-              <div className="mt-2 grid gap-2 text-sm">
-                <Link href="/w/workspace-1/home" className="btn btn-soft text-left">Home</Link>
-                <Link href="/w/workspace-1/understand/reader" className="btn btn-soft text-left">Reader</Link>
-                <Link href="/w/workspace-1/build/docs" className="btn btn-soft text-left">Docs</Link>
-                <Link href="/w/workspace-1/review/export" className="btn btn-soft text-left">Export</Link>
+              <div className="panel">
+                <p className="text-xs font-semibold uppercase tracking-wide text-rose-700">Degraded mode safety</p>
+                <ul className="mt-2 list-disc space-y-1 pl-5 text-sm">
+                  <li>Raw source is preserved before parsing.</li>
+                  <li>Last valid preview remains available.</li>
+                  <li>History snapshots allow guarded restore.</li>
+                </ul>
               </div>
             </aside>
           </div>
+
+          <nav className="panel fixed inset-x-2 bottom-2 z-20 flex gap-2 overflow-auto lg:hidden">
+            {topLinks.map((item) => (
+              <Link key={`mobile-${item.href}`} href={item.href} className="btn btn-soft shrink-0">
+                {item.label}
+              </Link>
+            ))}
+          </nav>
         </div>
       </section>
     </main>
