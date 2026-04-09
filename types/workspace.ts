@@ -70,20 +70,6 @@ export interface ValidationIssue {
   affectedSection: string;
 }
 
-export interface ActionCenterItem {
-  id: string;
-  sourceAgent: string;
-  type: string;
-  severity: 'info' | 'warning' | 'error';
-  title: string;
-  description: string;
-  linkedArtifactId?: string;
-  linkedSourceId?: string;
-  nextStep: string;
-  status: ItemStatus;
-  createdAt: string;
-}
-
 export interface JobItem extends TraceableItem<string> {
   state: JobState;
 }
@@ -125,7 +111,6 @@ export interface WorkspaceModel {
   validation: ValidationIssue[];
   customization: { theme: string; density: 'compact'|'comfortable'; motion: 'low'|'normal'; };
   runtime: { provider: 'ollama' | 'remote' | 'hybrid' | 'manual'; state: RuntimeState; modelAvailable: boolean; startupStatus: string; degradedNotice: string; };
-  actionCenter: ActionCenterItem[];
 }
 
 export interface WorkspaceInput {

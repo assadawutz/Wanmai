@@ -1,3 +1,3 @@
 import { createRoutePage } from '../lib/route-page';
 
-export default createRoutePage('/home');
+export default createRoutePage('/docs');
