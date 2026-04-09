@@ -1,3 +1,5 @@
-import { createRoutePage } from '../../lib/route-page';
+import { DailyCorePage } from '../../components/daily-core/DailyCorePage';
 
-export default createRoutePage('/review/export');
+export default function ExportPage(): JSX.Element {
+  return <DailyCorePage route="export" />;
+}

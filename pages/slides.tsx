@@ -1,3 +1,5 @@
-import { createRoutePage } from '../lib/route-page';
+import { DailyCorePage } from '../components/daily-core/DailyCorePage';
 
-export default createRoutePage('/slides');
+export default function SlidesPage(): JSX.Element {
+  return <DailyCorePage route="slides" />;
+}
