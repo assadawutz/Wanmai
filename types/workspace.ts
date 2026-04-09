@@ -32,6 +32,22 @@ export interface TraceableItem<T = unknown> {
   updatedAt: string;
 }
 
+export type RuntimeState = 'ready' | 'starting' | 'unavailable' | 'degraded' | 'failed';
+
+export interface ActionCenterItem {
+  id: string;
+  sourceAgent: string;
+  type: 'fix' | 'review' | 'approve' | 'rewrite' | 'present' | 'export' | 'retry' | 'investigate' | 'clarify' | 'redact';
+  severity: 'info' | 'warning' | 'critical';
+  title: string;
+  description: string;
+  linkedArtifactId?: string;
+  linkedSourceId?: string;
+  nextStep: string;
+  status: 'open' | 'in_progress' | 'blocked' | 'resolved';
+  createdAt: string;
+}
+
 export interface SourceFile {
   id: string;
   name: string;
@@ -108,6 +124,8 @@ export interface WorkspaceModel {
   glossary: TraceableItem<string>[];
   validation: ValidationIssue[];
   customization: { theme: string; density: 'compact'|'comfortable'; motion: 'low'|'normal'; };
+  runtime: { provider: 'ollama' | 'remote' | 'hybrid' | 'manual'; state: RuntimeState; modelAvailable: boolean; startupStatus: string; degradedNotice: string; };
+  actionCenter: ActionCenterItem[];
 }
 
 export interface WorkspaceInput {

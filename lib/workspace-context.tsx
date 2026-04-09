@@ -3,6 +3,7 @@ import { ingestInputs } from './ingestion';
 import { generateSummary } from './summary';
 import { validateWorkspace } from './validation';
 import { createSnapshot, restoreSnapshot } from './history';
+import { buildActionItem } from './part3-policy';
 import type { TraceableItem, WorkspaceInput, WorkspaceModel } from '../types/workspace';
 
 type Action =
@@ -24,7 +25,9 @@ const initialState: WorkspaceModel = {
   smartSlides: [{ id: 'slide-1', type: 'slide', label: 'Opening', value: { title: 'Project Overview', bullets: ['Objective', 'Scope', 'Milestones'] }, confidence: 1, status: 'user-added', createdAt: now, updatedAt: now }],
   storyboard: [], processMaps: [], mermaidDocuments: [{ id: 'mermaid-1', type: 'diagram', label: 'Flow', value: 'flowchart TD\nA[Upload]-->B[Analyze]\nB-->C[Build]\nC-->D[Present]', confidence: 1, status: 'user-added', createdAt: now, updatedAt: now }],
   raid: [], issues: [], decisions: [], dependencies: [], changes: [], resources: [], budgets: [], releases: [], approvals: [],
-  audioArtifacts: [], history: [], jobs: [], actionCenter: [], glossary: [], validation: [], customization: { theme: 'Lady Premium', density: 'comfortable', motion: 'normal' }
+  audioArtifacts: [], history: [], jobs: [], glossary: [], validation: [], customization: { theme: 'Lady Premium', density: 'comfortable', motion: 'normal' },
+  runtime: { provider: 'ollama', state: 'degraded', modelAvailable: false, startupStatus: 'Auto-start pending runtime check', degradedNotice: 'Manual mode active. Workspace remains fully usable without AI.' },
+  actionCenter: []
 };
 
 function reducer(state: WorkspaceModel, action: Action): WorkspaceModel {
@@ -38,6 +41,18 @@ function reducer(state: WorkspaceModel, action: Action): WorkspaceModel {
       };
       updated.summaries = generateSummary(updated);
       updated.validation = validateWorkspace(updated);
+      updated.actionCenter = [
+        buildActionItem({
+          sourceAgent: 'Intake Agent',
+          type: updated.validation.length > 0 ? 'review' : 'approve',
+          severity: updated.validation.length > 0 ? 'warning' : 'info',
+          title: updated.validation.length > 0 ? 'Validation review required' : 'Intake completed',
+          description: `Processed ${data.sourceFiles.length} file(s) with parser normalization.`,
+          nextStep: updated.validation.length > 0 ? 'Review validation cards and resolve warnings.' : 'Continue to Deep Summary.',
+          status: 'open'
+        }),
+        ...state.actionCenter
+      ];
       return updated;
     }
     case 'UPDATE_DOC':
@@ -50,11 +65,39 @@ function reducer(state: WorkspaceModel, action: Action): WorkspaceModel {
       return { ...state, customization: action.payload };
     case 'SNAPSHOT':
       return { ...state, history: [createSnapshot(state, action.label), ...state.history] };
-    case 'RESTORE':
-      return restoreSnapshot(state, action.id);
+    case 'RESTORE': {
+      const restored = restoreSnapshot(state, action.id);
+      return {
+        ...restored,
+        actionCenter: [
+          buildActionItem({
+            sourceAgent: 'Sync / History Agent',
+            type: 'review',
+            severity: 'info',
+            title: 'Snapshot restored',
+            description: `Restore operation completed for snapshot ${action.id}.`,
+            nextStep: 'Run validation before external export.',
+            status: 'open'
+          }),
+          ...restored.actionCenter
+        ]
+      };
+    }
     case 'ADD_AUDIO': {
       const actions = action.transcript.split('.').filter((t) => /action|next|decide/i.test(t)).map((t) => t.trim());
-      return { ...state, audioArtifacts: [...state.audioArtifacts, { id: `audio-${state.audioArtifacts.length + 1}`, type: 'audio-summary', label: `Audio Summary ${state.audioArtifacts.length + 1}`, value: { transcript: action.transcript, actions }, confidence: 0.7, status: 'extracted', createdAt: now, updatedAt: now }] };
+      return { ...state, audioArtifacts: [...state.audioArtifacts, { id: `audio-${state.audioArtifacts.length + 1}`, type: 'audio-summary', label: `Audio Summary ${state.audioArtifacts.length + 1}`, value: { transcript: action.transcript, actions }, confidence: 0.7, status: 'extracted', createdAt: now, updatedAt: now }],
+        actionCenter: [
+          buildActionItem({
+            sourceAgent: 'Meeting / Action Hub',
+            type: actions.length > 0 ? 'approve' : 'clarify',
+            severity: actions.length > 0 ? 'info' : 'warning',
+            title: actions.length > 0 ? 'Meeting actions extracted' : 'No clear actions detected',
+            description: actions.length > 0 ? `Detected ${actions.length} follow-up action(s).` : 'Transcript needs clearer decision/action phrases.',
+            nextStep: actions.length > 0 ? 'Assign owners in Operate modules.' : 'Edit transcript and rerun extraction.',
+            status: 'open'
+          }),
+          ...state.actionCenter
+        ] };
     }
     case 'ADD_KANBAN_CARD': {
       const collection = action.list === 'issues' ? state.issues : state.decisions;

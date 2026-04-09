@@ -10,7 +10,18 @@ export interface WorkspaceFeatureDefinition {
   fallback: string[];
 }
 
-const defaultOutputs = [...universalFeatureResponseShape];
+const defaultOutputs = [
+  'What it is',
+  'What matters most',
+  'Detailed interpretation',
+  'Risks / gaps / ambiguities',
+  'Pros / cons',
+  'Recommendations',
+  'Next actions',
+  'Overall summary',
+  'Readiness / quality judgment',
+  'Exact improvement path if not ready'
+];
 
 export const menuMap: WorkspaceFeatureDefinition[] = [
   { id: 'command-home', group: 'Home', label: 'Command Home', goal: 'เปิดมาแล้ว user ต้องรู้ว่าจะทำอะไรต่อทันที', agents: ['Home Agent'], mustOutput: ['best next step', 'unfinished work', 'pending approvals', 'failed jobs', 'suggested outputs'], fallback: ['start template state', 'upload-first empty state', 'static suggestion cards if AI down'] },
