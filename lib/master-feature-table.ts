@@ -11,6 +11,23 @@ export interface MasterFeatureSpec {
   productionGates: string[];
 }
 
+export const universalFeatureResponseShape = [
+  'featureIntent',
+  'sourceContext',
+  'factualCore',
+  'interpretation',
+  'risksAndGaps',
+  'prosAndCons',
+  'recommendations',
+  'nextActions',
+  'visualOutputPlan',
+  'readinessJudgment',
+  'fallbackState',
+  'traceLinks'
+] as const;
+
+export type UniversalFeatureResponseBlock = typeof universalFeatureResponseShape[number];
+
 export const masterFeatureTable: Record<string, MasterFeatureSpec> = {
   'command-home': {
     route: '/home',
@@ -287,3 +304,33 @@ export const globalQualityJudgmentPolicy = [
   'evidence quality',
   'readiness to show others'
 ];
+
+export const universalRenderRules = {
+  document: ['structured sections', 'source-linked callouts', 'evidence blocks', 'print-safe pages', 'fallback: raw section list'],
+  sheet: ['grid', 'KPI rails', 'charts', 'compare panels', 'fallback: readonly table'],
+  slide: ['thumbnails', 'active slide canvas', 'notes', 'presenter-safe preview', 'fallback: outline deck'],
+  board: ['widgets', 'group containers', 'linked cards', 'zoom/pan canvas', 'fallback: list board'],
+  flow: ['node graph', 'minimap', 'validation overlays', 'fallback: linear process list'],
+  mermaid: ['live diagram', 'code + warning split', 'fallback: preserve code + last valid render'],
+  storyboard: ['scene cards', 'transition lines', 'sequence lane', 'fallback: scene list'],
+  presentation: ['live deck', 'audience mode', 'presenter mode', 'fallback: static deck stepping']
+} as const;
+
+export const prePushQAChecks = {
+  home: ['home never blank', 'suggested actions always present', 'recent work safe if empty/null'],
+  intake: ['malformed file safe', 'retry safe', 'raw file preserved', 'queue states accurate'],
+  reader: ['all supported reader modes safe', 'source trace no crash', 'partial extraction visible'],
+  summary: ['layered summary present', 'no empty recommendation state when enough context exists', 'fact vs interpretation distinct'],
+  docs: ['autosave works', 'editor no crash', 'print preview isolated', 'evidence rail safe'],
+  sheets: ['grid safe on empty data', 'charts safe on bad values', 'no formula crash'],
+  slides: ['reorder safe', 'notes persist', 'preview safe'],
+  boards: ['drag/drop safe', 'layout persists', 'invalid widget metadata safe'],
+  flow: ['orphan/cycle warnings visible', 'graph editor no hard crash'],
+  mermaid: ['broken syntax isolated', 'render failure does not affect app shell'],
+  storyboard: ['broken scene links visible', 'reorder safe'],
+  presentation: ['readiness evaluator active', 'no fullscreen shell break', 'touch + keyboard navigation safe'],
+  ops: ['CRUD safe', 'linked references safe', 'empty states present'],
+  history: ['invalid snapshot warning safe', 'restore never destroys current work silently'],
+  aiRuntime: ['auto-start check safe', 'degraded mode safe', 'provider switch safe'],
+  integrations: ['failed auth/sync does not break local use', 'retry safe']
+} as const;

@@ -1,4 +1,22 @@
 export type ItemStatus = 'extracted' | 'confirmed' | 'edited' | 'user-added' | 'unresolved' | 'failed-extraction' | 'migrated-legacy';
+export type JobState =
+  | 'queued'
+  | 'running'
+  | 'success'
+  | 'warning'
+  | 'partial-success'
+  | 'failed'
+  | 'cancelled'
+  | 'retrying'
+  | 'fallback-running'
+  | 'fallback-success'
+  | 'fallback-failed';
+
+export type ReadinessVerdict =
+  | 'Ready to share'
+  | 'Needs minor polish'
+  | 'Needs structural rewrite'
+  | 'Not ready for external viewing';
 
 export interface TraceableItem<T = unknown> {
   id: string;
@@ -36,6 +54,24 @@ export interface ValidationIssue {
   affectedSection: string;
 }
 
+export interface ActionCenterItem {
+  id: string;
+  sourceAgent: string;
+  type: string;
+  severity: 'info' | 'warning' | 'error';
+  title: string;
+  description: string;
+  linkedArtifactId?: string;
+  linkedSourceId?: string;
+  nextStep: string;
+  status: ItemStatus;
+  createdAt: string;
+}
+
+export interface JobItem extends TraceableItem<string> {
+  state: JobState;
+}
+
 export interface SceneNode extends TraceableItem<Record<string, unknown>> {
   parentId?: string;
   children: string[];
@@ -67,7 +103,8 @@ export interface WorkspaceModel {
   approvals: TraceableItem<string>[];
   audioArtifacts: TraceableItem<{ transcript: string; actions: string[] }> [];
   history: { id: string; label: string; createdAt: string; state: WorkspaceModel }[];
-  jobs: TraceableItem<string>[];
+  jobs: JobItem[];
+  actionCenter: ActionCenterItem[];
   glossary: TraceableItem<string>[];
   validation: ValidationIssue[];
   customization: { theme: string; density: 'compact'|'comfortable'; motion: 'low'|'normal'; };

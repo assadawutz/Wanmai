@@ -24,7 +24,7 @@ const initialState: WorkspaceModel = {
   smartSlides: [{ id: 'slide-1', type: 'slide', label: 'Opening', value: { title: 'Project Overview', bullets: ['Objective', 'Scope', 'Milestones'] }, confidence: 1, status: 'user-added', createdAt: now, updatedAt: now }],
   storyboard: [], processMaps: [], mermaidDocuments: [{ id: 'mermaid-1', type: 'diagram', label: 'Flow', value: 'flowchart TD\nA[Upload]-->B[Analyze]\nB-->C[Build]\nC-->D[Present]', confidence: 1, status: 'user-added', createdAt: now, updatedAt: now }],
   raid: [], issues: [], decisions: [], dependencies: [], changes: [], resources: [], budgets: [], releases: [], approvals: [],
-  audioArtifacts: [], history: [], jobs: [], glossary: [], validation: [], customization: { theme: 'Lady Premium', density: 'comfortable', motion: 'normal' }
+  audioArtifacts: [], history: [], jobs: [], actionCenter: [], glossary: [], validation: [], customization: { theme: 'Lady Premium', density: 'comfortable', motion: 'normal' }
 };
 
 function reducer(state: WorkspaceModel, action: Action): WorkspaceModel {
