@@ -3,18 +3,26 @@ import { ingestInputs } from './ingestion';
 import { generateSummary } from './summary';
 import { validateWorkspace } from './validation';
 import { createSnapshot, restoreSnapshot } from './history';
+import { exportWorkspace } from './export';
 import { buildActionItem } from './part3-policy';
 import type { TraceableItem, WorkspaceInput, WorkspaceModel } from '../types/workspace';
 
 type Action =
   | { type: 'INGEST'; payload: WorkspaceInput[] }
   | { type: 'UPDATE_DOC'; id: string; value: string }
+  | { type: 'CREATE_DOC'; title: string; sourceId?: string }
+  | { type: 'DUPLICATE_DOC'; id: string }
+  | { type: 'SAVE_AS_DOC'; id: string; title: string }
   | { type: 'ADD_SLIDE' }
+  | { type: 'UPDATE_SLIDE'; id: string; title: string; bullets: string[] }
+  | { type: 'REORDER_SLIDES'; ids: string[] }
   | { type: 'UPDATE_THEME'; payload: WorkspaceModel['customization'] }
   | { type: 'SNAPSHOT'; label: string }
   | { type: 'RESTORE'; id: string }
   | { type: 'ADD_AUDIO'; transcript: string }
-  | { type: 'ADD_KANBAN_CARD'; list: 'issues' | 'decisions'; label: string };
+  | { type: 'ADD_KANBAN_CARD'; list: 'issues' | 'decisions'; label: string }
+  | { type: 'SET_RUNTIME'; state: WorkspaceModel['runtime']['state']; provider?: WorkspaceModel['runtime']['provider']; notice?: string }
+  | { type: 'EXPORT'; mode: 'document' | 'slides' | 'backup' };
 
 const now = new Date().toISOString();
 
@@ -57,9 +65,80 @@ function reducer(state: WorkspaceModel, action: Action): WorkspaceModel {
     }
     case 'UPDATE_DOC':
       return { ...state, smartDocs: state.smartDocs.map((doc) => doc.id === action.id ? { ...doc, value: action.value, updatedAt: new Date().toISOString(), status: 'edited' } : doc) };
+    case 'CREATE_DOC': {
+      const id = `doc-${state.smartDocs.length + 1}`;
+      const source = action.sourceId ? state.sourceFiles.find((file) => file.id === action.sourceId)?.rawContent ?? '' : '';
+      const nowIso = new Date().toISOString();
+      const value = source ? `# ${action.title}\n\n${source.slice(0, 3000)}` : `# ${action.title}\n\nStart drafting your document.`;
+      return {
+        ...state,
+        smartDocs: [
+          {
+            id,
+            type: 'document',
+            label: action.title,
+            value,
+            confidence: 1,
+            status: 'user-added',
+            createdAt: nowIso,
+            updatedAt: nowIso
+          },
+          ...state.smartDocs
+        ]
+      };
+    }
+    case 'DUPLICATE_DOC': {
+      const source = state.smartDocs.find((doc) => doc.id === action.id);
+      if (!source) return state;
+      const id = `doc-${state.smartDocs.length + 1}`;
+      const nowIso = new Date().toISOString();
+      return {
+        ...state,
+        smartDocs: [
+          {
+            ...source,
+            id,
+            label: `${source.label} (Copy)`,
+            createdAt: nowIso,
+            updatedAt: nowIso
+          },
+          ...state.smartDocs
+        ]
+      };
+    }
+    case 'SAVE_AS_DOC':
+      return {
+        ...state,
+        smartDocs: state.smartDocs.map((doc) => (
+          doc.id === action.id
+            ? { ...doc, label: action.title, updatedAt: new Date().toISOString(), status: 'confirmed' }
+            : doc
+        ))
+      };
     case 'ADD_SLIDE': {
       const id = `slide-${state.smartSlides.length + 1}`;
       return { ...state, smartSlides: [...state.smartSlides, { id, type: 'slide', label: `Slide ${state.smartSlides.length + 1}`, value: { title: 'New Slide', bullets: ['Insight', 'Evidence', 'Action'] }, confidence: 1, status: 'user-added', createdAt: now, updatedAt: now }] };
+    }
+    case 'UPDATE_SLIDE':
+      return {
+        ...state,
+        smartSlides: state.smartSlides.map((slide) => (
+          slide.id === action.id
+            ? {
+                ...slide,
+                label: action.title,
+                value: { title: action.title, bullets: action.bullets },
+                updatedAt: new Date().toISOString(),
+                status: 'edited'
+              }
+            : slide
+        ))
+      };
+    case 'REORDER_SLIDES': {
+      const mapped = new Map(state.smartSlides.map((slide) => [slide.id, slide]));
+      const reordered = action.ids.map((id) => mapped.get(id)).filter((slide): slide is NonNullable<typeof slide> => Boolean(slide));
+      const rest = state.smartSlides.filter((slide) => !action.ids.includes(slide.id));
+      return { ...state, smartSlides: [...reordered, ...rest] };
     }
     case 'UPDATE_THEME':
       return { ...state, customization: action.payload };
@@ -103,6 +182,36 @@ function reducer(state: WorkspaceModel, action: Action): WorkspaceModel {
       const collection = action.list === 'issues' ? state.issues : state.decisions;
       const item: TraceableItem<string> = { id: `${action.list}-${collection.length + 1}`, type: action.list, label: action.label, value: action.label, confidence: 1, status: 'user-added', createdAt: now, updatedAt: now };
       return action.list === 'issues' ? { ...state, issues: [...state.issues, item] } : { ...state, decisions: [...state.decisions, item] };
+    }
+    case 'SET_RUNTIME':
+      return {
+        ...state,
+        runtime: {
+          ...state.runtime,
+          state: action.state,
+          provider: action.provider ?? state.runtime.provider,
+          degradedNotice: action.notice ?? state.runtime.degradedNotice
+        }
+      };
+    case 'EXPORT': {
+      const result = exportWorkspace(state, action.mode);
+      return {
+        ...state,
+        jobs: [
+          {
+            id: `job-export-${Date.now()}`,
+            type: 'export',
+            label: `${action.mode} export`,
+            value: result.message,
+            confidence: result.success ? 1 : 0.3,
+            status: result.success ? 'confirmed' : 'failed-extraction',
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+            state: result.success ? 'succeeded' : 'failed'
+          },
+          ...state.jobs
+        ]
+      };
     }
     default:
       return state;

@@ -1,3 +1,5 @@
-import { createRoutePage } from '../../lib/route-page';
+import { DailyCorePage } from '../../components/daily-core/DailyCorePage';
 
-export default createRoutePage('/summary/validation');
+export default function SummaryValidationPage(): JSX.Element {
+  return <DailyCorePage route="validation" />;
+}

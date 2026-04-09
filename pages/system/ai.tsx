@@ -1,3 +1,5 @@
-import { createRoutePage } from '../../lib/route-page';
+import { DailyCorePage } from '../../components/daily-core/DailyCorePage';
 
-export default createRoutePage('/system/ai');
+export default function AiSystemPage(): JSX.Element {
+  return <DailyCorePage route="ai" />;
+}

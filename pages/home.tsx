@@ -1,3 +1,5 @@
-import { createRoutePage } from '../lib/route-page';
+import { DailyCorePage } from '../components/daily-core/DailyCorePage';
 
-export default createRoutePage('/home');
+export default function HomePage(): JSX.Element {
+  return <DailyCorePage route="home" />;
+}

@@ -1,3 +1,5 @@
-import { createRoutePage } from '../../lib/route-page';
+import { DailyCorePage } from '../../components/daily-core/DailyCorePage';
 
-export default createRoutePage('/intake/library');
+export default function IntakeLibraryPage(): JSX.Element {
+  return <DailyCorePage route="library" />;
+}

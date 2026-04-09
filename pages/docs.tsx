@@ -1,3 +1,5 @@
-import { createRoutePage } from '../lib/route-page';
+import { DailyCorePage } from '../components/daily-core/DailyCorePage';
 
-export default createRoutePage('/docs');
+export default function DocsPage(): JSX.Element {
+  return <DailyCorePage route="docs" />;
+}
